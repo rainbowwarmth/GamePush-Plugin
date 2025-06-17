@@ -1,4 +1,4 @@
-import { requset } from '#GamePush.components'
+import { request } from '#GamePush.components'
 import { api, getGameAPI, getGameName, versionComparator } from '#GamePush.model'
 
 class Download {
@@ -38,7 +38,7 @@ class Download {
     const apiUrl = getGameAPI(game)
 
     try {
-      const data = await requset.get(apiUrl, { responseType: 'json', log: true, gameName: getGameName(game) })
+      const data = await request.get(apiUrl, { responseType: 'json', log: true, gameName: getGameName(game) })
 
       if (game === 'ww') {
         return this.handleWWData(data, type)

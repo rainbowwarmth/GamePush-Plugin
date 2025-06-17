@@ -1,4 +1,4 @@
-import { cfg, requset } from '#GamePush.components'
+import { cfg, request } from '#GamePush.components'
 import { base, notice, getGameCheckAPI, getGameName, getRedisKeys, GAME_CONFIG, versionComparator } from '#GamePush.model'
 
 class ApiTools extends base {
@@ -37,7 +37,7 @@ class ApiTools extends base {
     }
     try {
       const apiUrl = this.gameApis.get(game)
-      const data = await requset.get(apiUrl, { responseType: 'json', log: true, gameName: getGameName(game) })
+      const data = await request.get(apiUrl, { responseType: 'json', log: true, gameName: getGameName(game) })
 
       if (game === 'ww') {
         await this.processWWData(data, game, auto)

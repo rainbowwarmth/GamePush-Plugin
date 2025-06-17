@@ -1,4 +1,4 @@
-import { cfg, requset } from '#GamePush.components'
+import { cfg, request } from '#GamePush.components'
 import { api, base, download, getGameCheckAPI, getDownloadAPI } from '#GamePush.model'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 
@@ -79,19 +79,19 @@ class Notifier extends base {
         }
       } else if (game === 'ys') {
         let BranchesUrl = getGameCheckAPI(game)
-        let BranchesData = await requset.get(BranchesUrl, { responseType: 'json', log: true, gameName: gameName })
+        let BranchesData = await request.get(BranchesUrl, { responseType: 'json', log: true, gameName: gameName })
         let chucksizeApi; let data; let mainSize = 0; let PreSize = 0
         const Version = BranchesData?.data?.game_branches?.[0]?.pre_download?.diff_tags[0]
 
         if (type === 'pre') {
           chucksizeApi = getDownloadAPI(type, BranchesData?.data?.game_branches?.[0]?.pre_download?.package_id, BranchesData?.data?.game_branches?.[0]?.pre_download?.password)
-          data = await requset.post(chucksizeApi, { responseType: 'json', log: true, gameName: gameName })
+          data = await request.post(chucksizeApi, { responseType: 'json', log: true, gameName: gameName })
           PreSize += parseInt(data?.data?.manifests?.[0]?.stats[Version]?.uncompressed_size, 10)
           PreSize += parseInt(data?.data?.manifests?.[1]?.stats[Version]?.uncompressed_size, 10)
           incrementalSize = api.formatSize(PreSize)
         } else {
           chucksizeApi = getDownloadAPI(type, BranchesData?.data?.game_branches?.[0]?.main?.package_id, BranchesData?.data?.game_branches?.[0]?.main?.password)
-          data = await requset.get(chucksizeApi, { responseType: 'json', log: true, gameName: gameName })
+          data = await request.get(chucksizeApi, { responseType: 'json', log: true, gameName: gameName })
           mainSize += parseInt(data?.data?.manifests[0]?.deduplicated_stats?.uncompressed_size, 10)
           mainSize += parseInt(data?.data?.manifests[1]?.deduplicated_stats?.uncompressed_size, 10)
           formattedTotalSize = api.formatSize(mainSize)

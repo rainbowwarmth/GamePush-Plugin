@@ -106,5 +106,5 @@ class Request {
   }
 }
 
-const requset = new Request()
-export default requset
+const request = new Request()
+export default request
