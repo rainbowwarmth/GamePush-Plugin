@@ -1,6 +1,6 @@
 {
   "name": "GamePush-Plugin",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "游戏更新推送插件",
   "main": "index.js",
   "scripts": {
@@ -17,13 +17,11 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "eslint": "^9.18.0",
+   "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-n": "^17.15.1",
-    "eslint-plugin-promise": "^7.2.1",
-    "express": "^4.21.2",
-    "express-art-template": "^1.0.1"
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.6.0"
   },
   "imports": {
     "#GamePush": "./model/index.js"

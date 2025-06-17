@@ -1,9 +1,6 @@
-import { Config, ApiTools, getRedisKeys } from '#GamePush'
+import { cfg, api, getRedisKeys } from '#GamePush'
 
-let api = new ApiTools()
-let cfg = new Config()
 let ysReg = '(ys|YS|原神)'
-let time = cfg.getGameConfig('ys').cron || '0 0/5 * * * *'
 
 export class ysPush extends plugin {
   constructor () {
@@ -31,7 +28,7 @@ export class ysPush extends plugin {
     })
 
     this.task = {
-      cron: time,
+      cron: cfg.getGameConfig('ys').cron || '0 0/5 * * * *',
       name: '[GamePush-Plugin] 原神版本监控',
       fnc: () => api.autoCheck('ys'),
       log: false
@@ -63,6 +60,7 @@ export class ysPush extends plugin {
       }
       config.enable = isEnable
       config.cron = config.cron || '0 0/5 * * * *'
+      config.pushChangeType = config.pushChangeType || '1'
     })
 
     const action = isEnable ? `已添加本群到推送列表（ID：${groupId}）` : '已移除本群推送'

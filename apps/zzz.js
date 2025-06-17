@@ -1,11 +1,6 @@
-import { Config, ApiTools, getRedisKeys, download } from '#GamePush'
-
-let api = new ApiTools()
-let down = new download()
-let cfg = new Config()
+import { cfg, api, download, getRedisKeys } from '#GamePush'
 
 let zzzReg = '(绝区零|zzz|ZZZ)'
-let time = cfg.getGameConfig('zzz').cron || '0 0/5 * * * *'
 
 export class zzzPush extends plugin {
   constructor () {
@@ -41,7 +36,7 @@ export class zzzPush extends plugin {
     })
 
     this.task = {
-      cron: time,
+      cron: cfg.getGameConfig('zzz').cron || '0 0/5 * * * *',
       name: '[GamePush-Plugin] 绝区零版本监控',
       fnc: () => api.autoCheck('zzz'),
       log: false
@@ -73,6 +68,7 @@ export class zzzPush extends plugin {
       }
       config.enable = isEnable
       config.cron = config.cron || '0 0/5 * * * *'
+      config.pushChangeType = config.pushChangeType || '1'
     })
 
     const action = isEnable ? `已添加本群到推送列表（ID：${groupId}）` : '已移除本群推送'
@@ -97,10 +93,11 @@ export class zzzPush extends plugin {
 
   async zzzDownloadLinks () {
     try {
-      const { data, patch } = await down.getDownloadData('zzz', 'main')
+      const { data, patch } = await download.getDownloadData('zzz', 'main')
+      console.log(data)
       if (!data) return this.reply('当前没有可用的正式版本下载', true)
 
-      const { msg, clent, audio, patch_clent, patch_audio } = down.formatDownloadInfo('zzz', data, 'main', patch)
+      const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo('zzz', data, 'main', patch)
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
@@ -109,10 +106,10 @@ export class zzzPush extends plugin {
 
   async zzzPreDownloadLinks () {
     try {
-      const { data, patch } = await down.getDownloadData('zzz', 'pre')
+      const { data, patch } = await download.getDownloadData('zzz', 'pre')
       if (!data) return this.reply('🚫 绝区零当前未开放预下载', true)
 
-      const { msg, clent, audio, patch_clent, patch_audio } = down.formatDownloadInfo('zzz', data, 'pre', patch)
+      const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo('zzz', data, 'pre', patch)
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)

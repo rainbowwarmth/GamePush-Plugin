@@ -1,11 +1,6 @@
-import { Config, ApiTools, getRedisKeys, download } from '#GamePush'
-
-let api = new ApiTools()
-let down = new download()
-let cfg = new Config()
+import { cfg, api, download, getRedisKeys } from '#GamePush'
 
 let bh3Reg = '(崩坏三|崩坏3|崩三|崩3|bbb|三崩子)'
-let time = cfg.getGameConfig('bh3').cron || '0 0/5 * * * *'
 
 export class bh3Push extends plugin {
   constructor () {
@@ -41,7 +36,7 @@ export class bh3Push extends plugin {
     })
 
     this.task = {
-      cron: time,
+      cron: cfg.getGameConfig('bh3').cron || '0 0/5 * * * *',
       name: '[GamePush-Plugin] 崩坏3版本监控',
       fnc: () => api.autoCheck('bh3'),
       log: false
@@ -73,6 +68,7 @@ export class bh3Push extends plugin {
       }
       config.enable = isEnable
       config.cron = config.cron || '0 0/5 * * * *'
+      config.pushChangeType = config.pushChangeType || '1'
     })
 
     const action = isEnable ? `已添加本群到推送列表（ID：${groupId}）` : '已移除本群推送'
@@ -97,10 +93,10 @@ export class bh3Push extends plugin {
 
   async bh3DownloadLinks () {
     try {
-      const { data, patch } = await down.getDownloadData('bh3', 'main')
+      const { data, patch } = await download.getDownloadData('bh3', 'main')
       if (!data) return this.reply('当前没有可用的正式版本下载', true)
 
-      const { msg, clent, audio, patch_clent, patch_audio } = down.formatDownloadInfo('bh3', data, 'main', patch)
+      const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo('bh3', data, 'main', patch)
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
@@ -109,10 +105,10 @@ export class bh3Push extends plugin {
 
   async bh3PreDownloadLinks () {
     try {
-      const { data, patch } = await down.getDownloadData('bh3', 'pre')
+      const { data, patch } = await download.getDownloadData('bh3', 'pre')
       if (!data) return this.reply('🚫 崩坏3当前未开放预下载', true)
 
-      const { msg, clent, audio, patch_clent, patch_audio } = down.formatDownloadInfo('bh3', data, 'pre', patch)
+      const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo('bh3', data, 'pre', patch)
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)

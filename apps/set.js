@@ -1,12 +1,13 @@
 import { getRedisKeys } from '#GamePush'
 
-const Reg = '(原神|星铁|绝区零|崩三)'
+const Reg = '(原神|星铁|绝区零|崩三|鸣潮)'
 
 const gameInfoMap = {
   原神: { id: 'ys', display: '原神' },
   星铁: { id: 'sr', display: '星铁' },
   绝区零: { id: 'zzz', display: '绝区零' },
-  崩三: { id: 'bh3', display: '崩坏3' }
+  崩三: { id: 'bh3', display: '崩坏3' },
+  鸣潮: { id: 'ww', display: '鸣潮' }
 }
 
 export class Set extends plugin {

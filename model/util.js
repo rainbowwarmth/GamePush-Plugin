@@ -1,61 +1,62 @@
 const API_BASE = 'https://hyp-api.mihoyo.com/hyp/hyp-connect/api/getGamePackages'
-const Check_API = 'https://hyp-api.mihoyo.com/hyp/hyp-connect/api/getGameBranches'
-const LAUNCHER_ID = 'jGHBHlcOq1'
+const CHECK_API = 'https://hyp-api.mihoyo.com/hyp/hyp-connect/api/getGameBranches'
+const Download_API = 'https://api-takumi.mihoyo.com/downloader/sophon_chunk/api/'
+const WW_API_BASE = 'https://prod-cn-alicdn-gamestarter.kurogame.com/launcher/game/G152/10003_Y8xXrXk65DqFHEDgApn3cpK5lfczpFx5/index.json'
 
-const GAME_CONFIG = {
+export const GAME_CONFIG = {
   ys: {
     id: '1Z8W5NHUQb',
     name: '原神',
-    redisKey: 'YZ:MHY:YS',
-    preKey: 'YZ:MHY:YS:PRE'
+    redisPrefix: 'YS'
   },
   sr: {
     id: '64kMb5iAWu',
     name: '崩坏:星穹铁道',
-    redisKey: 'YZ:MHY:SR',
-    preKey: 'YZ:MHY:SR:PRE'
+    redisPrefix: 'SR'
   },
   zzz: {
     id: 'x6znKlJ0xK',
     name: '绝区零',
-    redisKey: 'YZ:MHY:ZZZ',
-    preKey: 'YZ:MHY:ZZZ:PRE'
+    redisPrefix: 'ZZZ'
   },
   bh3: {
     id: 'osvnlOc0S8',
     name: '崩坏3',
-    redisKey: 'YZ:MHY:BH3',
-    preKey: 'YZ:MHY:BH3:PRE'
+    redisPrefix: 'BH3'
+  },
+  ww: {
+    name: '鸣潮',
+    redisPrefix: 'WW'
   }
 }
 
-const getGameAPI = (game) => {
-  if (!GAME_CONFIG[game]) throw new Error(`[GamePush-Plugin] 无效的游戏标识: ${game}`)
-  return `${API_BASE}?launcher_id=${LAUNCHER_ID}&game_ids[]=${GAME_CONFIG[game].id}`
+export const getGameAPI = (game) => {
+  if (game === 'ww') return WW_API_BASE
+  return `${API_BASE}?launcher_id=jGHBHlcOq1&game_ids[]=${GAME_CONFIG[game].id}`
 }
 
-const getGameCheckAPI = (game) => {
-  if (!GAME_CONFIG[game]) throw new Error(`[GamePush-Plugin] 无效的游戏标识: ${game}`)
-  return `${Check_API}?launcher_id=${LAUNCHER_ID}&game_ids[]=${GAME_CONFIG[game].id}`
+export const getGameCheckAPI = (game) => {
+  if (game === 'ww') return WW_API_BASE
+  return `${CHECK_API}?launcher_id=jGHBHlcOq1&game_ids[]=${GAME_CONFIG[game].id}`
 }
 
-const getGameName = (game) => GAME_CONFIG[game]?.name || '未知游戏'
+export const getDownloadAPI = (type, package_id, password) => {
+  if (type === 'pre') return `${Download_API}getPatchBuild?branch=predownload&plat_app=ddxf5qt290cg&package_id=${package_id}&password=${password}`
+  return `${Download_API}getBuild?branch=main&plat_app=ddxf5qt290cg&package_id=${package_id}&password=${password}`
+}
 
-const getRedisKeys = (game) => {
-  const config = GAME_CONFIG[game]
+export const getGameName = (game) =>
+  GAME_CONFIG[game]?.name || '未知游戏'
+
+export const getRedisKeys = (game) => {
+  const prefix = GAME_CONFIG[game]?.redisPrefix || 'GAME'
   return {
-    main: config?.redisKey,
-    pre: config?.preKey
+    main: `Yz:GamePush:${prefix}:Main`,
+    pre: `Yz:GamePush:${prefix}:Pre`
   }
 }
 
-export {
-  API_BASE,
-  Check_API,
-  LAUNCHER_ID,
-  GAME_CONFIG,
-  getGameAPI,
-  getGameCheckAPI,
-  getGameName,
-  getRedisKeys
-}
+export const versionComparator = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: 'base'
+})

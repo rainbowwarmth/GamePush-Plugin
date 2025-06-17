@@ -1,10 +1,6 @@
-import { Config, ApiTools, getRedisKeys, download } from '#GamePush'
+import { cfg, api, download, getRedisKeys } from '#GamePush'
 
-let api = new ApiTools()
-let down = new download()
-let cfg = new Config()
 let srReg = '(sr|SR|星铁|星穹铁道|铁道|崩坏星穹铁道)'
-let time = cfg.getGameConfig('sr').cron || '0 0/5 * * * *'
 
 export class srPush extends plugin {
   constructor () {
@@ -40,7 +36,7 @@ export class srPush extends plugin {
     })
 
     this.task = {
-      cron: time,
+      cron: cfg.getGameConfig('sr').cron || '0 0/5 * * * *',
       name: '[GamePush-Plugin] 星铁版本监控',
       fnc: () => api.autoCheck('sr'),
       log: false
@@ -71,6 +67,7 @@ export class srPush extends plugin {
       }
       config.enable = isEnable
       config.cron = config.cron || '0 0/5 * * * *'
+      config.pushChangeType = config.pushChangeType || '1'
     })
 
     const action = isEnable ? `已添加本群到推送列表（ID：${groupId}）` : '已移除本群推送'
@@ -95,10 +92,10 @@ export class srPush extends plugin {
 
   async srDownloadLinks () {
     try {
-      const { data, patch } = await down.getDownloadData('sr', 'main')
+      const { data, patch } = await download.getDownloadData('sr', 'main')
       if (!data) return this.reply('当前没有可用的正式版本下载', true)
 
-      const { msg, clent, audio, patch_clent, patch_audio } = down.formatDownloadInfo('sr', data, 'main', patch)
+      const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo('sr', data, 'main', patch)
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
@@ -107,10 +104,10 @@ export class srPush extends plugin {
 
   async srPreDownloadLinks () {
     try {
-      const { data, patch } = await down.getDownloadData('sr', 'pre')
+      const { data, patch } = await download.getDownloadData('sr', 'pre')
       if (!data) return this.reply('🚫 星铁当前未开放预下载', true)
 
-      const { msg, clent, audio, patch_clent, patch_audio } = down.formatDownloadInfo('sr', data, 'pre', patch)
+      const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo('sr', data, 'pre', patch)
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)

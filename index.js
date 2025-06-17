@@ -1,5 +1,8 @@
 import fs from 'node:fs'
 
+logger.info('GamePush-Plugin 加载中')
+logger.info('Created By rainbowwarmth')
+
 const files = fs.readdirSync('./plugins/GamePush-Plugin/apps').filter(file => file.endsWith('.js'))
 
 let ret = []
