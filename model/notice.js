@@ -6,6 +6,7 @@ import download from './download.js'
 import { getGameCheckAPI, getDownloadAPI } from './util.js'
 
 class Notifier extends base {
+  // HTML模板映射
   templateMap = {
     main: ({ gameName, oldVersion, newVersion, formattedTotalSize, incrementalSize}) => [
       `<span class="emoji-text">✨</span> ${gameName}游戏版本更新通知`,
@@ -16,7 +17,7 @@ class Notifier extends base {
       ...(gameName !== '原神' ? [`<span class="emoji-text">💾</span> 发送【#${gameName}获取下载链接】获取客户端`] : [])
     ],
 
-    pre: ({ gameName, newVersion, incrementalSize }) => [
+    pre: ({ gameName, newVersion, formattedTotalSize, incrementalSize }) => [
       `<span class="emoji-text">🎁</span> ${gameName}预下载资源已开放`,
       `<span class="emoji-text">📦</span> 新版本：${newVersion}`,
       ...(gameName !== '原神' ? [formattedTotalSize && `<span class="emoji-text">📦</span> 完整大小（含中文语音）：${formattedTotalSize}`] : []),
@@ -31,6 +32,7 @@ class Notifier extends base {
     ]
   }
 
+  // 文本模板映射
   textTemplateMap = {
     main: ({ gameName, oldVersion, newVersion, formattedTotalSize, incrementalSize}) => {
       const parts = [
@@ -44,11 +46,11 @@ class Notifier extends base {
       return parts.filter(Boolean).join('\n')
     },
 
-    pre: ({ gameName, newVersion, incrementalSize }) => {
+    pre: ({ gameName, newVersion, formattedTotalSize, incrementalSize }) => {
       const parts = [
         `🎁${gameName}预下载资源已开放`,
         `📦新版本：${newVersion}`,
-        ...(gameName !== '原神' ? [formattedTotalSize && `<span class="emoji-text">📦</span> 完整大小（含中文语音）：${formattedTotalSize}`] : []),
+        ...(gameName !== '原神' ? [formattedTotalSize && `📦 完整大小（含中文语音）：${formattedTotalSize}`] : []),
         ...((gameName !== '崩坏3') ? [incrementalSize && `🔄 增量更新大小：约${incrementalSize}`] : []),
         '📥请提前下载游戏资源',
         ...(gameName !== '原神' ? [`💾 发送【#${gameName}获取预下载链接】获取客户端`] : [])
@@ -62,12 +64,17 @@ class Notifier extends base {
     ].join('\n')
   }
 
-  async pushNotify ({ type, game, newVersion, oldVersion, pushChangeType }) {
+  /**
+   * 推送通知
+   * @param {Object} options - 推送选项
+   */
+  async pushNotify({ type, game, newVersion, oldVersion, pushChangeType }) {
     try {
       const gameConfig = cfg.getGameConfig(game)
       const gameName = this.getGameName(game)
       let formattedTotalSize, incrementalSize
 
+      // 获取游戏大小信息
       if (game == 'ww') {
         if (type === 'main' || type === 'pre') {
           const downloadData = await download.getDownloadData(game, type)
@@ -77,16 +84,17 @@ class Notifier extends base {
           incrementalSize = api.formatSize(patchTotalSize)
         }
       } else if (game === 'ys') {
+        // 原神特殊处理
         let BranchesUrl = getGameCheckAPI(game)
         let Branches = await fetch(BranchesUrl, { method: 'GET' })
         let BranchesData = await Branches.json()
         let chucksizeApi, chucksizeData, data, mainSize = 0, PreSize = 0
         const Version = BranchesData?.data?.game_branches?.[0]?.pre_download?.diff_tags[0]
+        
         if (type === 'pre') {
           chucksizeApi = getDownloadAPI(type, BranchesData?.data?.game_branches?.[0]?.pre_download?.package_id, BranchesData?.data?.game_branches?.[0]?.pre_download?.password)
           chucksizeData = await fetch(chucksizeApi, { method: 'POST' })
           data = await chucksizeData.json()
-          console.log(data?.data?.manifests?.[0]?.stats[Version]?.uncompressed_size)
           PreSize += parseInt(data?.data?.manifests?.[0]?.stats[Version]?.uncompressed_size, 10)
           PreSize += parseInt(data?.data?.manifests?.[1]?.stats[Version]?.uncompressed_size, 10)
           incrementalSize = api.formatSize(PreSize)
@@ -99,90 +107,88 @@ class Notifier extends base {
           formattedTotalSize = api.formatSize(mainSize)
         }
       } else {
+        // 其他游戏处理
         if (type === 'main' || type === 'pre') {
-          const downloadData = await download.getDownloadData(game, type)
-          let totalSize = 0
-
-          if (downloadData.data?.game_pkgs) {
-            downloadData.data.game_pkgs.forEach(pkg => {
-              totalSize += parseInt(pkg.size || '0', 10)
-            })
+          try {
+            const downloadData = await download.getDownloadData(game, type)
+            if (downloadData?.data?.game_pkgs?.[0]?.size) {
+              formattedTotalSize = api.formatSize(downloadData.data.game_pkgs[0].size)
+            }
+            if (downloadData?.patch?.game_pkgs?.[0]?.size) {
+              incrementalSize = api.formatSize(downloadData.patch.game_pkgs[0].size)
+            }
+          } catch (err) {
+            logger.error(`[GamePush-Plugin] 获取${gameName}大小信息失败`, err)
           }
-
-          if (downloadData.data?.audio_pkgs) {
-            const chineseAudio = downloadData.data.audio_pkgs.find(a =>
-              a.language.toLowerCase() === 'zh-cn'
-            )
-            if (chineseAudio) totalSize += parseInt(chineseAudio.size || '0', 10)
-          }
-
-          formattedTotalSize = api.formatSize(totalSize)
-
-          let patchTotalSize = 0
-
-          if (downloadData.patch?.game_pkgs) {
-            downloadData.patch.game_pkgs.forEach(pkg => {
-              patchTotalSize += parseInt(pkg.size || '0', 10)
-            })
-          }
-
-          if (downloadData.patch?.audio_pkgs) {
-            const chineseAudio = downloadData.patch.audio_pkgs.find(a =>
-              a.language.toLowerCase() === 'zh-cn'
-            )
-            if (chineseAudio) patchTotalSize += parseInt(chineseAudio.size || '0', 10)
-          }
-
-          incrementalSize = api.formatSize(patchTotalSize)
         }
       }
 
-      const templateParams = {
+      // 准备推送数据
+      const templateData = {
         gameName,
-        oldVersion: oldVersion,
-        newVersion: newVersion,
+        oldVersion,
+        newVersion,
         formattedTotalSize,
         incrementalSize
       }
 
-      if (pushChangeType === '2') {
-        this.sendTextNotification(templateParams, type, game, gameConfig)
+      // 根据推送类型选择不同的模板
+      if (pushChangeType === '1') {
+        // 图片消息
+        await this.sendImageMessage(type, game, gameConfig, templateData)
       } else {
-        await this.sendImageNotification(templateParams, type, game, gameConfig)
+        // 文本消息
+        await this.sendTextMessage(type, game, gameConfig, templateData)
       }
     } catch (err) {
-      logger.error(`[GamePush-Plugin][${this.getGameName(game)}通知] 失败`, err)
+      logger.error(`[GamePush-Plugin] 推送通知失败: ${err.message}`, err)
     }
   }
 
-  sendTextNotification (params, type, game, gameConfig) {
-    const text = this.textTemplateMap[type](params)
-    api.sendToGroups(text, game, gameConfig)
+  /**
+   * 发送图片消息
+   * @param {string} type - 推送类型
+   * @param {string} game - 游戏ID
+   * @param {Object} gameConfig - 游戏配置
+   * @param {Object} templateData - 模板数据
+   */
+  async sendImageMessage(type, game, gameConfig, templateData) {
+    try {
+      // 渲染图片
+      const img = await puppeteer.screenshot('GamePush-Plugin', {
+        ...this.screenData(game),
+        messages: this.templateMap[type](templateData),
+        date: new Date().toLocaleDateString(),
+        type
+      })
+
+      // 发送图片消息
+      api.sendToGroups(img, game, gameConfig)
+    } catch (err) {
+      logger.error(`[GamePush-Plugin] 发送图片消息失败: ${err.message}`, err)
+    }
   }
 
-  async sendImageNotification (params, type, game, gameConfig) {
-    const escapeHtml = (str) => {
-      if (!str) return ''
-      return str.replace(/[&<>"']/g,
-        tag => ({
-          '&': '&amp',
-          '<': '&lt',
-          '>': '&gt',
-          '"': '&quot',
-          "'": '&#39'
-        }[tag]))
-    }
+  /**
+   * 发送文本消息
+   * @param {string} type - 推送类型
+   * @param {string} game - 游戏ID
+   * @param {Object} gameConfig - 游戏配置
+   * @param {Object} templateData - 模板数据
+   */
+  async sendTextMessage(type, game, gameConfig, templateData) {
+    try {
+      // 获取文本模板
+      const template = this.textTemplateMap[type]
+      if (!template) throw new Error(`未知的推送类型: ${type}`)
 
-    const data = {
-      ...this.getScreenData(game),
-      messages: this.templateMap[type](params),
-      gameName: escapeHtml(params.gameName),
-      date: new Date().toLocaleDateString(),
-      type
+      const content = template(templateData)
+      
+      // 发送文本消息
+      api.sendToGroups(content, game, gameConfig)
+    } catch (err) {
+      logger.error(`[GamePush-Plugin] 发送文本消息失败: ${err.message}`, err)
     }
-
-    const img = await puppeteer.screenshot('GamePush-Plugin/notice', data)
-    api.sendToGroups(img, game, gameConfig)
   }
 }
 

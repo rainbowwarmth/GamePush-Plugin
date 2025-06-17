@@ -1,9 +1,9 @@
 import { cfg, api, getRedisKeys } from '#GamePush'
 
-let ysReg = '(ys|YS|原神)'
+const ysReg = '(ys|YS|原神)'
 
 export class ysPush extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '[GamePush-Plugin]原神功能',
       dsc: '原神版本更新及预下载推送',
@@ -11,17 +11,17 @@ export class ysPush extends plugin {
       priority: 7000,
       rule: [
         {
-          reg: `^#*${ysReg}版本监控$`,
+          reg: `^#*${ysReg}?版本监控$`,
           fnc: 'ysCheck',
           permission: 'master'
         },
         {
-          reg: `^#*${ysReg}(开启|关闭)版本推送$`,
+          reg: `^#*${ysReg}?(开启|关闭)版本推送$`,
           fnc: 'ysPushSet',
           permission: 'master'
         },
         {
-          reg: `^#*${ysReg}当前版本$`,
+          reg: `^#*${ysReg}?当前版本$`,
           fnc: 'ysVer'
         }
       ]
@@ -35,14 +35,21 @@ export class ysPush extends plugin {
     }
   }
 
-  async ysCheck () {
+  /**
+   * 手动检查原神版本
+   */
+  async ysCheck() {
     await api.checkVersion(true, 'ys')
     return this.reply('✅ 已执行手动检查', true)
   }
 
-  async ysPushSet () {
+  /**
+   * 设置原神版本推送
+   */
+  async ysPushSet() {
     const e = this.e
     const groupId = String(e.group_id)
+    
     if (!e.isGroup) {
       return this.reply('❌ 该功能仅限群聊中使用', true)
     }
@@ -51,6 +58,7 @@ export class ysPush extends plugin {
 
     cfg.updateGameConfig('ys', (config) => {
       config.pushGroups = config.pushGroups || []
+      
       if (isEnable) {
         if (!config.pushGroups.includes(groupId)) {
           config.pushGroups.push(groupId)
@@ -58,6 +66,7 @@ export class ysPush extends plugin {
       } else {
         config.pushGroups = config.pushGroups.filter(id => id !== groupId)
       }
+      
       config.enable = isEnable
       config.cron = config.cron || '0 0/5 * * * *'
       config.pushChangeType = config.pushChangeType || '1'
@@ -67,7 +76,10 @@ export class ysPush extends plugin {
     return this.reply(`✅ 已${isEnable ? '开启' : '关闭'}原神版本推送，${action}`, true)
   }
 
-  async ysVer () {
+  /**
+   * 查询原神当前版本
+   */
+  async ysVer() {
     const { main, pre } = getRedisKeys('ys')
     const [mainVer, preVer] = await Promise.all([
       redis.get(main),

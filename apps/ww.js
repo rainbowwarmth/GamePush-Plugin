@@ -1,6 +1,6 @@
 import { cfg, api, download, getRedisKeys } from '#GamePush'
 
-let wwReg = '(~|鸣潮|ww|WW|mc)'
+const wwReg = '(~|鸣潮|ww|WW|mc)'
 
 export class wwPush extends plugin {
   constructor () {
@@ -43,11 +43,17 @@ export class wwPush extends plugin {
     }
   }
 
+  /**
+   * 手动检查鸣潮版本
+   */
   async wwCheck () {
     await api.checkVersion(true, 'ww')
     return this.reply('✅ 已执行手动检查', true)
   }
 
+  /**
+   * 设置鸣潮版本推送
+   */
   async wwPushSet () {
     const e = this.e
     const groupId = String(e.group_id)
@@ -74,7 +80,10 @@ export class wwPush extends plugin {
     const action = isEnable ? `已添加本群到推送列表（ID：${groupId}）` : '已移除本群推送'
     return this.reply(`✅ 已${isEnable ? '开启' : '关闭'}鸣潮版本推送，${action}`, true)
   }
-
+  
+  /**
+   * 查询鸣潮当前版本
+   */
   async wwVer () {
     const { main, pre } = getRedisKeys('ww')
     const [mainVer, preVer] = await Promise.all([
@@ -91,26 +100,32 @@ export class wwPush extends plugin {
     return this.reply(msg, true)
   }
 
+  /**
+   * 获取鸣潮下载链接
+   */
   async wwDownloadLinks () {
     try {
       const { data, patch } = await download.getDownloadData('ww', 'main')
       console.log(data)
       if (!data) return this.reply('当前没有可用的正式版本下载', true)
 
-      const { msg, client, patchesMessages } = download.formatDownloadInfo('ww', data, 'main', patch)
-      return this.reply(await Bot.makeForwardArray([msg, client, patchesMessages]))
+      const { msg, clent, patch_clent } = download.formatDownloadInfo('ww', data, 'main', patch)
+      return this.reply(await Bot.makeForwardArray([msg, clent, patch_clent]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
     }
   }
 
+  /**
+   * 获取鸣潮预下载链接
+   */
   async wwPreDownloadLinks () {
     try {
       const { data, patch } = await download.getDownloadData('ww', 'pre')
       if (!data) return this.reply('🚫 鸣潮当前未开放预下载', true)
 
-      const { msg, client, patchesMessages } = download.formatDownloadInfo('ww', data, 'pre', patch)
-      return this.reply(await Bot.makeForwardArray([msg, client, patchesMessages]))
+      const { msg, clent, patch_clent } = download.formatDownloadInfo('ww', data, 'pre', patch)
+      return this.reply(await Bot.makeForwardArray([msg, clent, patch_clent]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)
     }

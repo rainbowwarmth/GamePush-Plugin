@@ -1,92 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <style>
-    :root {
-      --bg-color: #f5f5f5;
-      --card-bg: #ffffff;
-      --text-color: #333333;
-    }
-    
-    @font-face {
-      font-family: 'NotoColorEmoji';
-      src: url('{{pluResPath}}fonts/NotoColorEmoji.ttf')
-    }
-    
-    @font-face {
-      font-family: 'HYWenHei';
-      src: url('{{pluResPath}}fonts/HYWenHei-85W.ttf');
-    }
-
-    .emoji-text {
-      font-family: 'NotoColorEmoji', sans-serif;
-      display: inline-block;
-      margin-right: 4px;
-    }
-
-    body {
-      background: var(--bg-color);
-      padding: 20px;
-      font-family: 'HYWenHei', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: var(--text-color);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .game-icon {
-      width: 50px;
-      height: 50px;
-      margin-right: 15px;
-      border-radius: 8px;
-      content: url("{{icon}}");
-    }
-
-    .title {
-      font-size: 24px;
-      font-weight: bold;
-      color: #2a2a2a;
-    }
-
-    .message-list {
-      line-height: 1.6;
-      font-size: 16px;
-      padding-left: 10px;
-    }
-
-    .message-item {
-      margin: 10px 0;
-      padding-left: 1em;
-      text-indent: -1em;
-    }
-
-    .version {
-      color: #666;
-      font-size: 14px;
-      margin: 8px 0;
-    }
-
-    .footer {
-      margin-top: 20px;
-      color: #888;
-      font-size: 12px;
-      text-align: center;
-    }
-  </style>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+  <link rel="shortcut icon" href="#"/>
+  <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/GamePush-Plugin/GamePush-Plugin.css"/>
 </head>
 <body>
   <div class="container">

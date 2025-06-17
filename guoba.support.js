@@ -15,7 +15,7 @@ export function supportGuoba () {
       name: 'GamePush-Plugin',
       title: '游戏推送',
       description: '自动监控游戏版本更新并推送通知',
-      author: 'rainbowwarmth',
+      author: '@rainbowwarmth',
       link: 'https://gitcode.com/rainbowwarmth/GamePush-Plugin.git',
       isV3: true,
       showInMenu: true,

@@ -1,6 +1,6 @@
 import { cfg, api, download, getRedisKeys } from '#GamePush'
 
-let bh3Reg = '(崩坏三|崩坏3|崩三|崩3|bbb|三崩子)'
+const bh3Reg = '(崩坏三|崩坏3|崩三|崩3|bbb|三崩子)'
 
 export class bh3Push extends plugin {
   constructor () {
@@ -43,11 +43,17 @@ export class bh3Push extends plugin {
     }
   }
 
+  /**
+   * 手动检查崩坏3版本
+   */
   async bh3Check () {
     await api.checkVersion(true, 'bh3')
     return this.reply('✅ 已执行手动检查', true)
   }
 
+  /**
+   * 设置崩坏3版本推送
+   */
   async bh3PushSet () {
     const e = this.e
     const groupId = String(e.group_id)
@@ -75,6 +81,9 @@ export class bh3Push extends plugin {
     return this.reply(`✅ 已${isEnable ? '开启' : '关闭'}崩坏3版本推送，${action}`, true)
   }
 
+  /**
+   * 查询崩坏3当前版本
+   */
   async bh3Ver () {
     const { main, pre } = getRedisKeys('bh3')
     const [mainVer, preVer] = await Promise.all([
@@ -91,6 +100,9 @@ export class bh3Push extends plugin {
     return this.reply(msg, true)
   }
 
+  /**
+   * 获取崩坏3下载链接
+   */
   async bh3DownloadLinks () {
     try {
       const { data, patch } = await download.getDownloadData('bh3', 'main')
@@ -103,6 +115,9 @@ export class bh3Push extends plugin {
     }
   }
 
+  /**
+   * 获取崩坏3预下载链接
+   */
   async bh3PreDownloadLinks () {
     try {
       const { data, patch } = await download.getDownloadData('bh3', 'pre')

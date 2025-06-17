@@ -1,6 +1,6 @@
 import { cfg, api, download, getRedisKeys } from '#GamePush'
 
-let zzzReg = '(绝区零|zzz|ZZZ)'
+const zzzReg = '(绝区零|zzz|ZZZ)'
 
 export class zzzPush extends plugin {
   constructor () {
@@ -43,11 +43,17 @@ export class zzzPush extends plugin {
     }
   }
 
+  /**
+   * 手动检查绝区零版本
+   */
   async zzzCheck () {
     await api.checkVersion(true, 'zzz')
     return this.reply('✅ 已执行手动检查', true)
   }
 
+  /**
+   * 设置绝区零版本推送
+   */
   async zzzPushSet () {
     const e = this.e
     const groupId = String(e.group_id)
@@ -75,6 +81,9 @@ export class zzzPush extends plugin {
     return this.reply(`✅ 已${isEnable ? '开启' : '关闭'}绝区零版本推送，${action}`, true)
   }
 
+  /**
+   * 查询绝区零当前版本
+   */
   async zzzVer () {
     const { main, pre } = getRedisKeys('zzz')
     const [mainVer, preVer] = await Promise.all([
@@ -91,6 +100,9 @@ export class zzzPush extends plugin {
     return this.reply(msg, true)
   }
 
+  /**
+   * 获取绝区零下载链接
+   */
   async zzzDownloadLinks () {
     try {
       const { data, patch } = await download.getDownloadData('zzz', 'main')
@@ -104,6 +116,9 @@ export class zzzPush extends plugin {
     }
   }
 
+  /**
+   * 获取绝区零预下载链接
+   */
   async zzzPreDownloadLinks () {
     try {
       const { data, patch } = await download.getDownloadData('zzz', 'pre')
