@@ -1,8 +1,11 @@
 {
   "name": "GamePush-Plugin",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "游戏更新推送插件",
   "main": "index.js",
+  "author": "rainbowwarmth",
+  "license": "MIT",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --fix",
@@ -13,9 +16,6 @@
     "url": "https://gitcode.com/rainbowwarmth/GamePush-Plugin.git"
   },
   "keywords": [],
-  "author": "rainbowwarmth",
-  "license": "ISC",
-  "type": "module",
   "devDependencies": {
    "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
