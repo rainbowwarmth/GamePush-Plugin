@@ -1,4 +1,4 @@
-import cfg from './model/config.js'
+import { cfg } from '#GamePush.components'
 
 const gameIds = ['ys', 'sr', 'zzz', 'bh3', 'ww']
 const gameMap = {

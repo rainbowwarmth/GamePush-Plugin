@@ -10,7 +10,7 @@ export default class base {
    * 构造函数
    * @param {Object} e - 事件对象
    */
-  constructor(e = {}) {
+  constructor (e = {}) {
     this.e = e
     this.userId = Number(e?.user_id) || String(e?.user_id)
     this.model = 'GamePush-Plugin'
@@ -21,7 +21,7 @@ export default class base {
    * 获取Redis前缀
    * @returns {string} Redis前缀
    */
-  get prefix() {
+  get prefix () {
     return `Yz:GamePush-Plugin:${this.model}:`
   }
 
@@ -30,7 +30,7 @@ export default class base {
    * @param {string} game - 游戏ID
    * @returns {string} 游戏名称
    */
-  getGameName(game) {
+  getGameName (game) {
     const gameNames = {
       sr: '星穹铁道',
       ys: '原神',
@@ -46,7 +46,7 @@ export default class base {
    * @param {string} game - 游戏ID
    * @returns {Object} 截图数据
    */
-  screenData(game) {
+  screenData (game) {
     return this.getScreenData(game)
   }
 
@@ -55,8 +55,7 @@ export default class base {
    * @param {string} game - 游戏ID
    * @returns {Object} 截图数据
    */
-  getScreenData(game) {
-    // 基础数据
+  getScreenData (game) {
     const basic = {
       saveId: `push_${game}_${Date.now()}`,
       cwd: this._path,
@@ -68,7 +67,6 @@ export default class base {
       yunzaiName: cfg.package.name === 'miao-yunzai' ? 'Miao-Yunzai' : cfg.package.name === 'trss-yunzai' ? 'TRSS-Yunzai' : _.capitalize(cfg.package.name)
     }
 
-    // 游戏图标
     const icons = {
       zzz: 'https://www.miyoushe.com/_static/img/game-zzz.3ca2bac.png',
       sr: 'https://c-ssl.duitang.com/uploads/blog/202110/11/20211011094243_6ff48.jpeg',

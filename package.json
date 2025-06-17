@@ -24,6 +24,7 @@
     "eslint-plugin-promise": "^6.6.0"
   },
   "imports": {
-    "#GamePush": "./model/index.js"
+    "#GamePush.model": "./model/index.js",
+    "#GamePush.components": "./components/index.js"
   }
 }

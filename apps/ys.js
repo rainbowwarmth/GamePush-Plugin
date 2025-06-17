@@ -1,9 +1,10 @@
-import { cfg, api, getRedisKeys } from '#GamePush'
+import { cfg } from '#GamePush.components'
+import { api, getRedisKeys } from '#GamePush.model'
 
 const ysReg = '(ys|YS|原神)'
 
 export class ysPush extends plugin {
-  constructor() {
+  constructor () {
     super({
       name: '[GamePush-Plugin]原神功能',
       dsc: '原神版本更新及预下载推送',
@@ -38,7 +39,7 @@ export class ysPush extends plugin {
   /**
    * 手动检查原神版本
    */
-  async ysCheck() {
+  async ysCheck () {
     await api.checkVersion(true, 'ys')
     return this.reply('✅ 已执行手动检查', true)
   }
@@ -46,10 +47,10 @@ export class ysPush extends plugin {
   /**
    * 设置原神版本推送
    */
-  async ysPushSet() {
+  async ysPushSet () {
     const e = this.e
     const groupId = String(e.group_id)
-    
+
     if (!e.isGroup) {
       return this.reply('❌ 该功能仅限群聊中使用', true)
     }
@@ -58,7 +59,7 @@ export class ysPush extends plugin {
 
     cfg.updateGameConfig('ys', (config) => {
       config.pushGroups = config.pushGroups || []
-      
+
       if (isEnable) {
         if (!config.pushGroups.includes(groupId)) {
           config.pushGroups.push(groupId)
@@ -66,7 +67,7 @@ export class ysPush extends plugin {
       } else {
         config.pushGroups = config.pushGroups.filter(id => id !== groupId)
       }
-      
+
       config.enable = isEnable
       config.cron = config.cron || '0 0/5 * * * *'
       config.pushChangeType = config.pushChangeType || '1'
@@ -79,7 +80,7 @@ export class ysPush extends plugin {
   /**
    * 查询原神当前版本
    */
-  async ysVer() {
+  async ysVer () {
     const { main, pre } = getRedisKeys('ys')
     const [mainVer, preVer] = await Promise.all([
       redis.get(main),

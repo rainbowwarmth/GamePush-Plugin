@@ -1,18 +1,14 @@
+import { cfg, requset } from '#GamePush.components'
+import { api, base, download, getGameCheckAPI, getDownloadAPI } from '#GamePush.model'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
-import cfg from './config.js'
-import base from './base.js'
-import api from './api.js'
-import download from './download.js'
-import { getGameCheckAPI, getDownloadAPI } from './util.js'
 
 class Notifier extends base {
-  // HTML模板映射
   templateMap = {
-    main: ({ gameName, oldVersion, newVersion, formattedTotalSize, incrementalSize}) => [
+    main: ({ gameName, oldVersion, newVersion, formattedTotalSize, incrementalSize }) => [
       `<span class="emoji-text">✨</span> ${gameName}游戏版本更新通知`,
       `<span class="emoji-text">🚀</span> 版本变更：${oldVersion} → ${newVersion}`,
       formattedTotalSize && `<span class="emoji-text">📦</span> 完整大小（含中文语音）：${formattedTotalSize}`,
-      ...((gameName !== '原神' && gameName !== '崩坏3') ? [incrementalSize&& `<span class="emoji-text">🔄</span> 增量更新大小：约${incrementalSize}`] : []),
+      ...((gameName !== '原神' && gameName !== '崩坏3') ? [incrementalSize && `<span class="emoji-text">🔄</span> 增量更新大小：约${incrementalSize}`] : []),
       '<span class="emoji-text">📢</span> 请及时更新客户端',
       ...(gameName !== '原神' ? [`<span class="emoji-text">💾</span> 发送【#${gameName}获取下载链接】获取客户端`] : [])
     ],
@@ -32,14 +28,13 @@ class Notifier extends base {
     ]
   }
 
-  // 文本模板映射
   textTemplateMap = {
-    main: ({ gameName, oldVersion, newVersion, formattedTotalSize, incrementalSize}) => {
+    main: ({ gameName, oldVersion, newVersion, formattedTotalSize, incrementalSize }) => {
       const parts = [
         `✨${gameName}游戏版本更新通知`,
         `🚀版本变更：${oldVersion} → ${newVersion}`,
         formattedTotalSize && `📦完整大小（含中文语音）：${formattedTotalSize}`,
-        ...((gameName !== '原神' && gameName !== '崩坏3') ? [incrementalSize&& `🔄 增量更新大小：约${incrementalSize}`] : []),
+        ...((gameName !== '原神' && gameName !== '崩坏3') ? [incrementalSize && `🔄 增量更新大小：约${incrementalSize}`] : []),
         '📢 请及时更新客户端',
         ...(gameName !== '原神' ? [`💾 发送【#${gameName}获取下载链接】获取客户端`] : [])
       ]
@@ -68,13 +63,12 @@ class Notifier extends base {
    * 推送通知
    * @param {Object} options - 推送选项
    */
-  async pushNotify({ type, game, newVersion, oldVersion, pushChangeType }) {
+  async pushNotify ({ type, game, newVersion, oldVersion, pushChangeType }) {
     try {
       const gameConfig = cfg.getGameConfig(game)
       const gameName = this.getGameName(game)
       let formattedTotalSize, incrementalSize
 
-      // 获取游戏大小信息
       if (game == 'ww') {
         if (type === 'main' || type === 'pre') {
           const downloadData = await download.getDownloadData(game, type)
@@ -84,30 +78,25 @@ class Notifier extends base {
           incrementalSize = api.formatSize(patchTotalSize)
         }
       } else if (game === 'ys') {
-        // 原神特殊处理
         let BranchesUrl = getGameCheckAPI(game)
-        let Branches = await fetch(BranchesUrl, { method: 'GET' })
-        let BranchesData = await Branches.json()
-        let chucksizeApi, chucksizeData, data, mainSize = 0, PreSize = 0
+        let BranchesData = await requset.get(BranchesUrl, { responseType: 'json', log: true, gameName: gameName })
+        let chucksizeApi; let data; let mainSize = 0; let PreSize = 0
         const Version = BranchesData?.data?.game_branches?.[0]?.pre_download?.diff_tags[0]
-        
+
         if (type === 'pre') {
           chucksizeApi = getDownloadAPI(type, BranchesData?.data?.game_branches?.[0]?.pre_download?.package_id, BranchesData?.data?.game_branches?.[0]?.pre_download?.password)
-          chucksizeData = await fetch(chucksizeApi, { method: 'POST' })
-          data = await chucksizeData.json()
+          data = await requset.post(chucksizeApi, { responseType: 'json', log: true, gameName: gameName })
           PreSize += parseInt(data?.data?.manifests?.[0]?.stats[Version]?.uncompressed_size, 10)
           PreSize += parseInt(data?.data?.manifests?.[1]?.stats[Version]?.uncompressed_size, 10)
           incrementalSize = api.formatSize(PreSize)
         } else {
           chucksizeApi = getDownloadAPI(type, BranchesData?.data?.game_branches?.[0]?.main?.package_id, BranchesData?.data?.game_branches?.[0]?.main?.password)
-          chucksizeData = await fetch(chucksizeApi, { method: 'GET' })
-          data = await chucksizeData.json()
+          data = await requset.get(chucksizeApi, { responseType: 'json', log: true, gameName: gameName })
           mainSize += parseInt(data?.data?.manifests[0]?.deduplicated_stats?.uncompressed_size, 10)
           mainSize += parseInt(data?.data?.manifests[1]?.deduplicated_stats?.uncompressed_size, 10)
           formattedTotalSize = api.formatSize(mainSize)
         }
       } else {
-        // 其他游戏处理
         if (type === 'main' || type === 'pre') {
           try {
             const downloadData = await download.getDownloadData(game, type)
@@ -132,12 +121,9 @@ class Notifier extends base {
         incrementalSize
       }
 
-      // 根据推送类型选择不同的模板
       if (pushChangeType === '1') {
-        // 图片消息
         await this.sendImageMessage(type, game, gameConfig, templateData)
       } else {
-        // 文本消息
         await this.sendTextMessage(type, game, gameConfig, templateData)
       }
     } catch (err) {
@@ -152,9 +138,8 @@ class Notifier extends base {
    * @param {Object} gameConfig - 游戏配置
    * @param {Object} templateData - 模板数据
    */
-  async sendImageMessage(type, game, gameConfig, templateData) {
+  async sendImageMessage (type, game, gameConfig, templateData) {
     try {
-      // 渲染图片
       const img = await puppeteer.screenshot('GamePush-Plugin', {
         ...this.screenData(game),
         messages: this.templateMap[type](templateData),
@@ -162,7 +147,6 @@ class Notifier extends base {
         type
       })
 
-      // 发送图片消息
       api.sendToGroups(img, game, gameConfig)
     } catch (err) {
       logger.error(`[GamePush-Plugin] 发送图片消息失败: ${err.message}`, err)
@@ -176,15 +160,13 @@ class Notifier extends base {
    * @param {Object} gameConfig - 游戏配置
    * @param {Object} templateData - 模板数据
    */
-  async sendTextMessage(type, game, gameConfig, templateData) {
+  async sendTextMessage (type, game, gameConfig, templateData) {
     try {
-      // 获取文本模板
       const template = this.textTemplateMap[type]
       if (!template) throw new Error(`未知的推送类型: ${type}`)
 
       const content = template(templateData)
-      
-      // 发送文本消息
+
       api.sendToGroups(content, game, gameConfig)
     } catch (err) {
       logger.error(`[GamePush-Plugin] 发送文本消息失败: ${err.message}`, err)

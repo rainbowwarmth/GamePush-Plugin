@@ -1,9 +1,10 @@
-import { cfg, api, download, getRedisKeys } from '#GamePush'
+import { cfg } from '#GamePush.components'
+import { api, download, getRedisKeys } from '#GamePush.model'
 
 const srReg = '(sr|SR|星铁|星穹铁道|铁道|崩坏星穹铁道)'
 
 export class srPush extends plugin {
-  constructor() {
+  constructor () {
     super({
       name: '[GamePush-Plugin]星铁功能',
       dsc: '星铁版本更新及预下载推送',
@@ -46,7 +47,7 @@ export class srPush extends plugin {
   /**
    * 手动检查星铁版本
    */
-  async srCheck() {
+  async srCheck () {
     await api.checkVersion(true, 'sr')
     return this.reply('✅ 已执行手动检查', true)
   }
@@ -54,19 +55,19 @@ export class srPush extends plugin {
   /**
    * 设置星铁版本推送
    */
-  async srPushSet() {
+  async srPushSet () {
     const e = this.e
     const groupId = String(e.group_id)
-    
+
     if (!e.isGroup) {
       return this.reply('❌ 该功能仅限群聊中使用', true)
     }
-    
+
     const isEnable = e.msg.includes('开启')
 
     cfg.updateGameConfig('sr', (config) => {
       config.pushGroups = config.pushGroups || []
-      
+
       if (isEnable) {
         if (!config.pushGroups.includes(groupId)) {
           config.pushGroups.push(groupId)
@@ -74,7 +75,7 @@ export class srPush extends plugin {
       } else {
         config.pushGroups = config.pushGroups.filter(id => id !== groupId)
       }
-      
+
       config.enable = isEnable
       config.cron = config.cron || '0 0/5 * * * *'
       config.pushChangeType = config.pushChangeType || '1'
@@ -87,7 +88,7 @@ export class srPush extends plugin {
   /**
    * 查询星铁当前版本
    */
-  async srVer() {
+  async srVer () {
     const { main, pre } = getRedisKeys('sr')
     const [mainVer, preVer] = await Promise.all([
       redis.get(main),
@@ -106,7 +107,7 @@ export class srPush extends plugin {
   /**
    * 获取星铁下载链接
    */
-  async srDownloadLinks() {
+  async srDownloadLinks () {
     try {
       const { data, patch } = await download.getDownloadData('sr', 'main')
       if (!data) return this.reply('当前没有可用的正式版本下载', true)
@@ -122,7 +123,7 @@ export class srPush extends plugin {
   /**
    * 获取星铁预下载链接
    */
-  async srPreDownloadLinks() {
+  async srPreDownloadLinks () {
     try {
       const { data, patch } = await download.getDownloadData('sr', 'pre')
       if (!data) return this.reply('当前没有可用的预下载版本', true)

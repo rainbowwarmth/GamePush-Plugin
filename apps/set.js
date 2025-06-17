@@ -1,4 +1,4 @@
-import { getRedisKeys } from '#GamePush'
+import { getRedisKeys } from '#GamePush.model'
 
 const Reg = '(原神|星铁|绝区零|崩三|鸣潮)'
 

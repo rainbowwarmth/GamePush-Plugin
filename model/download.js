@@ -1,6 +1,5 @@
-import fetch from 'node-fetch'
-import api from './api.js'
-import { getGameAPI, getGameName, versionComparator } from './util.js'
+import { requset } from '#GamePush.components'
+import { api, getGameAPI, getGameName, versionComparator } from '#GamePush.model'
 
 class Download {
   cache = new Map()
@@ -12,16 +11,14 @@ class Download {
    * @param {string} type - 下载类型
    * @returns {Promise<Object>} 下载数据
    */
-  async getDownloadData(game, type = 'main') {
+  async getDownloadData (game, type = 'main') {
     const cacheKey = `${game}-${type}`
     const cached = this.cache.get(cacheKey)
 
-    // 使用缓存数据（如果有效）
     if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
       return cached.data
     }
 
-    // 获取新数据
     const data = await this.fetchDownloadData(game, type)
     this.cache.set(cacheKey, {
       timestamp: Date.now(),
@@ -37,18 +34,12 @@ class Download {
    * @param {string} type - 下载类型
    * @returns {Promise<Object>} 下载数据
    */
-  async fetchDownloadData(game, type) {
+  async fetchDownloadData (game, type) {
     const apiUrl = getGameAPI(game)
 
     try {
-      const res = await fetch(apiUrl)
-      if (!res.ok) {
-        throw new Error(`API请求失败: ${res.status} ${res.statusText}`)
-      }
+      const data = await requset.get(apiUrl, { responseType: 'json', log: true, gameName: getGameName(game) })
 
-      const data = await res.json()
-
-      // 根据游戏类型处理数据
       if (game === 'ww') {
         return this.handleWWData(data, type)
       }
@@ -69,7 +60,7 @@ class Download {
    * @param {string} type - 下载类型
    * @returns {Object} 处理后的下载数据
    */
-  handleWWData(data, type) {
+  handleWWData (data, type) {
     const versionType = type === 'pre' ? 'predownload' : 'default'
     const versionData = data[versionType]?.config
 
@@ -81,13 +72,11 @@ class Download {
       }
     }
 
-    // 获取CDN URL
     const cdn = data.cdnList?.[0]?.url?.replace(/\/+$/, '') ||
         'https://pcdownload-huoshan.aki-game.com'
 
     const mainUrl = `${cdn}/${versionData.indexFile.replace(/^\//, '')}`
 
-    // 主要版本信息
     const mainMajor = {
       version: versionData.version,
       game_pkgs: [{
@@ -97,7 +86,6 @@ class Download {
       }]
     }
 
-    // 补丁包信息
     const patchPkgs = (versionData.patchConfig || [])
       .sort((a, b) => versionComparator.compare(b.version, a.version))
       .filter(patch => patch.indexFile)
@@ -121,15 +109,13 @@ class Download {
    * @param {string} type - 下载类型
    * @returns {Object} 处理后的下载数据
    */
-  handleMHYData(data, type) {
+  handleMHYData (data, type) {
     const packageData = data?.data?.game_packages?.[0] || {}
 
-    // 安全获取补丁数据
     const safeGetPatch = (patchArray) => {
       return (patchArray?.[0] || { game_pkgs: [], audio_pkgs: [] })
     }
 
-    // 根据下载类型获取不同数据
     if (type === 'pre') {
       const preData = packageData?.pre_download?.major || {}
       const prePatch = safeGetPatch(packageData?.pre_download?.patches)
@@ -159,40 +145,35 @@ class Download {
    * @param {Object} patch - 补丁数据
    * @returns {Object} 格式化后的下载信息
    */
-  formatDownloadInfo(game, data, type, patch) {
+  formatDownloadInfo (game, data, type, patch) {
     const gameName = getGameName(game)
     const version = data.version
     const typeText = type === 'pre' ? '预下载' : '正式版'
 
-    // 主要信息
     const msg = [
       `${gameName} ${typeText}下载信息`,
       `版本: ${version}`,
       '请选择需要的下载内容'
     ].join('\n')
 
-    // 客户端下载信息
     const clent = this.formatPackageInfo(
       data.game_pkgs,
       `${gameName} ${typeText}客户端下载`,
       '客户端'
     )
 
-    // 音频下载信息
     const audio = this.formatPackageInfo(
       data.audio_pkgs,
       `${gameName} ${typeText}音频下载`,
       '音频包'
     )
 
-    // 补丁客户端下载信息
     const patch_clent = this.formatPackageInfo(
       patch?.game_pkgs,
       `${gameName} ${typeText}客户端补丁下载`,
       '客户端补丁'
     )
 
-    // 补丁音频下载信息
     const patch_audio = this.formatPackageInfo(
       patch?.audio_pkgs,
       `${gameName} ${typeText}音频补丁下载`,
@@ -209,7 +190,7 @@ class Download {
    * @param {string} type - 类型
    * @returns {string} 格式化后的包信息
    */
-  formatPackageInfo(pkgs, title, type) {
+  formatPackageInfo (pkgs, title, type) {
     if (!pkgs || pkgs.length === 0) {
       return `${title}\n暂无${type}下载`
     }

@@ -1,4 +1,5 @@
-import { cfg, api, download, getRedisKeys } from '#GamePush'
+import { cfg } from '#GamePush.components'
+import { api, download, getRedisKeys } from '#GamePush.model'
 
 const wwReg = '(~|鸣潮|ww|WW|mc)'
 
@@ -80,7 +81,7 @@ export class wwPush extends plugin {
     const action = isEnable ? `已添加本群到推送列表（ID：${groupId}）` : '已移除本群推送'
     return this.reply(`✅ 已${isEnable ? '开启' : '关闭'}鸣潮版本推送，${action}`, true)
   }
-  
+
   /**
    * 查询鸣潮当前版本
    */

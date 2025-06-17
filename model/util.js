@@ -1,4 +1,3 @@
-// API基础URL
 const API_BASE = 'https://hyp-api.mihoyo.com/hyp/hyp-connect/api/getGamePackages'
 const CHECK_API = 'https://hyp-api.mihoyo.com/hyp/hyp-connect/api/getGameBranches'
 const Download_API = 'https://api-takumi.mihoyo.com/downloader/sophon_chunk/api/'

@@ -17,7 +17,7 @@ const GAME_IDS = ['ys', 'sr', 'zzz', 'bh3', 'ww']
  * @param {Array|any} groups - 群组ID列表
  * @returns {Array<string>} 规范化后的群组ID列表
  */
-function normalizeGroups(groups) {
+function normalizeGroups (groups) {
   return Array.isArray(groups)
     ? groups.map(String).filter(Boolean)
     : []
@@ -27,14 +27,14 @@ class Config {
   configCache = {}
   watcher = null
 
-  constructor() {
+  constructor () {
     this.init()
   }
 
   /**
    * 初始化配置管理器
    */
-  init() {
+  init () {
     try {
       if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true })
       if (!fs.existsSync(CONFIG_PATH)) this.saveConfig(this.getDefaultConfig())
@@ -50,7 +50,7 @@ class Config {
    * 获取默认配置
    * @returns {Object} 默认配置对象
    */
-  getDefaultConfig() {
+  getDefaultConfig () {
     return GAME_IDS.reduce((config, id) => {
       config[id] = {
         enable: true,
@@ -65,7 +65,7 @@ class Config {
   /**
    * 加载配置
    */
-  loadConfig() {
+  loadConfig () {
     try {
       const raw = fs.existsSync(CONFIG_PATH)
         ? YAML.parse(fs.readFileSync(CONFIG_PATH, 'utf8'))
@@ -92,7 +92,7 @@ class Config {
    * 保存配置
    * @param {Object} newConfig - 新配置对象
    */
-  saveConfig(newConfig) {
+  saveConfig (newConfig) {
     try {
       fs.writeFileSync(CONFIG_PATH, YAML.stringify(newConfig, { indent: 2 }), 'utf8')
       this.configCache = newConfig
@@ -104,7 +104,7 @@ class Config {
   /**
    * 设置配置文件监视器
    */
-  async setupWatcher() {
+  async setupWatcher () {
     if (!this.watcher) {
       try {
         const chokidar = await import('chokidar')
@@ -123,7 +123,7 @@ class Config {
    * @param {string} game - 游戏ID
    * @returns {Object} 游戏配置
    */
-  getGameConfig(game) {
+  getGameConfig (game) {
     return this.configCache[game] || this.getDefaultConfig()[game]
   }
 
@@ -132,7 +132,7 @@ class Config {
    * @param {string} game - 游戏ID
    * @param {Function} updater - 更新函数
    */
-  updateGameConfig(game, updater) {
+  updateGameConfig (game, updater) {
     const config = { ...this.configCache }
     config[game] = config[game] || this.getDefaultConfig()[game]
     updater(config[game])
@@ -143,7 +143,7 @@ class Config {
    * 获取前端配置
    * @returns {Object} 前端配置
    */
-  getFrontendConfig() {
+  getFrontendConfig () {
     return this.configCache
   }
 
@@ -153,7 +153,7 @@ class Config {
    * @param {Object} options - 选项
    * @returns {Object} 保存结果
    */
-  saveFromFrontend(data, { Result }) {
+  saveFromFrontend (data, { Result }) {
     try {
       const validConfig = GAME_IDS.reduce((config, gameId) => {
         if (data[gameId]) {
@@ -166,7 +166,6 @@ class Config {
         }
         return config
       }, {})
-
       this.saveConfig(validConfig)
       return { success: true, message: '配置保存成功' }
     } catch (err) {

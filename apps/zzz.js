@@ -1,4 +1,5 @@
-import { cfg, api, download, getRedisKeys } from '#GamePush'
+import { cfg } from '#GamePush.components'
+import { api, download, getRedisKeys } from '#GamePush.model'
 
 const zzzReg = '(绝区零|zzz|ZZZ)'
 
