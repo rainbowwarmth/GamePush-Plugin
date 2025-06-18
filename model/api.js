@@ -1,5 +1,5 @@
 import { cfg, request } from '#GamePush.components'
-import { base, notice, getGameCheckAPI, getGameName, getRedisKeys, GAME_CONFIG, versionComparator } from '#GamePush.model'
+import { base, notice, getGameChuckAPI, getGameName, getRedisKeys, GAME_CONFIG, versionComparator } from '#GamePush.model'
 
 class ApiTools extends base {
   gameApis = new Map()
@@ -7,7 +7,7 @@ class ApiTools extends base {
   constructor () {
     super()
     Object.keys(GAME_CONFIG).forEach(game => {
-      this.gameApis.set(game, getGameCheckAPI(game))
+      this.gameApis.set(game, getGameChuckAPI(game))
     })
   }
 

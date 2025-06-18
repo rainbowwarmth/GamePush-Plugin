@@ -48,7 +48,7 @@ export const getGameAPI = (game) => {
  * @param {string} game - 游戏ID
  * @returns {string} 检查API URL
  */
-export const getGameCheckAPI = (game) => {
+export const getGameChuckAPI = (game) => {
   if (game === 'ww') return WW_API_BASE
   return `${CHECK_API}?launcher_id=jGHBHlcOq1&game_ids[]=${GAME_CONFIG[game].id}`
 }

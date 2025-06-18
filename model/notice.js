@@ -1,5 +1,5 @@
 import { cfg, request } from '#GamePush.components'
-import { api, base, download, getGameCheckAPI, getDownloadAPI } from '#GamePush.model'
+import { api, base, download, getGameChuckAPI, getDownloadAPI } from '#GamePush.model'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 
 class Notifier extends base {
@@ -70,7 +70,7 @@ class Notifier extends base {
       let formattedTotalSize, incrementalSize
       
       if (game === 'ys') {
-        let BranchesUrl = getGameCheckAPI(game)
+        let BranchesUrl = getGameChuckAPI(game)
         let BranchesData = await request.get(BranchesUrl, { responseType: 'json', log: true, gameName: gameName })
         let chucksizeApi; let data; let mainSize = 0; let PreSize = 0
         const Version = BranchesData?.data?.game_branches?.[0]?.pre_download?.diff_tags[0]
