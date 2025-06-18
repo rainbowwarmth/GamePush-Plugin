@@ -68,31 +68,31 @@ class Notifier extends base {
       const gameConfig = cfg.getGameConfig(game)
       const gameName = this.getGameName(game)
       let formattedTotalSize, incrementalSize
-      
+
       if (game === 'ys') {
         let BranchesUrl = getGameChuckAPI(game)
-        let BranchesData = await request.get(BranchesUrl, { responseType: 'json', log: true, gameName: gameName })
+        let BranchesData = await request.get(BranchesUrl, { responseType: 'json', log: true, gameName })
         let chucksizeApi; let data; let mainSize = 0; let PreSize = 0
         const Version = BranchesData?.data?.game_branches?.[0]?.pre_download?.diff_tags[0]
         if (type === 'pre') {
           chucksizeApi = getDownloadAPI(type, BranchesData?.data?.game_branches?.[0]?.pre_download?.package_id, BranchesData?.data?.game_branches?.[0]?.pre_download?.password)
-          data = await request.post(chucksizeApi, { responseType: 'json', log: true, gameName: gameName })
+          data = await request.post(chucksizeApi, { responseType: 'json', log: true, gameName })
           PreSize += parseInt(data?.data?.manifests?.[0]?.stats[Version]?.uncompressed_size, 10)
           PreSize += parseInt(data?.data?.manifests?.[1]?.stats[Version]?.uncompressed_size, 10)
           incrementalSize = api.formatSize(PreSize)
         } else {
           chucksizeApi = getDownloadAPI(type, BranchesData?.data?.game_branches?.[0]?.main?.package_id, BranchesData?.data?.game_branches?.[0]?.main?.password)
-          data = await request.get(chucksizeApi, { responseType: 'json', log: true, gameName: gameName })
+          data = await request.get(chucksizeApi, { responseType: 'json', log: true, gameName })
           mainSize += parseInt(data?.data?.manifests[0]?.deduplicated_stats?.uncompressed_size, 10)
           mainSize += parseInt(data?.data?.manifests[1]?.deduplicated_stats?.uncompressed_size, 10)
           formattedTotalSize = api.formatSize(mainSize)
         }
       } else {
-          const downloadData = await download.getDownloadData(game, type)
-          let totalSize = downloadData.data.game_pkgs[0].size
-          formattedTotalSize = api.formatSize(totalSize)
-          let patchTotalSize = downloadData?.patch.game_pkgs[0]?.size
-          incrementalSize = api.formatSize(patchTotalSize)
+        const downloadData = await download.getDownloadData(game, type)
+        let totalSize = downloadData.data.game_pkgs[0].size
+        formattedTotalSize = api.formatSize(totalSize)
+        let patchTotalSize = downloadData?.patch.game_pkgs[0]?.size
+        incrementalSize = api.formatSize(patchTotalSize)
       }
 
       const templateData = {
