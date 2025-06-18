@@ -122,8 +122,9 @@ class Notifier extends base {
    */
   async sendImageMessage (type, game, gameConfig, templateData) {
     try {
+      console.log(type)
       const img = await puppeteer.screenshot('GamePush-Plugin', {
-        ...this.screenData(game),
+        ...this.screenData(game, type),
         messages: this.templateMap[type](templateData),
         date: new Date().toLocaleDateString(),
         type

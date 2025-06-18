@@ -42,28 +42,42 @@ export default class base {
   }
 
   /**
+   * @returns {string} 当前日期，格式为YYYYMMDD
+   */
+  getCurrentDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    return `${year}${month}${day}`; // 示例：20240618
+  }
+
+  /**
    * 获取截图数据（兼容旧API）
    * @param {string} game - 游戏ID
+   * @param {string} type - 截图类型（可选）
    * @returns {Object} 截图数据
    */
-  screenData (game) {
-    return this.getScreenData(game)
+  screenData (game, type= '') {
+    return this.getScreenData(game, type)
   }
 
   /**
    * 获取截图数据
    * @param {string} game - 游戏ID
+   * @param {string} type - 截图类型（可选）
    * @returns {Object} 截图数据
    */
-  getScreenData (game) {
+  getScreenData (game, type= '') {
+    const currentDate = this.getCurrentDate();
     const basic = {
-      saveId: `push_${game}_${Date.now()}`,
+      saveId: `push_${game}_${type}_${currentDate}`,
       cwd: this._path,
       tplFile: path.join(this._path, 'plugins/GamePush-Plugin/resources/html/GamePush-Plugin/GamePush-Plugin.html'),
       fontsPath: path.join(this._path, 'plugins/GamePush-Plugin/resources/fonts/'),
       pluResPath: path.join(this._path, 'plugins/GamePush-Plugin/resources/'),
       htmlSavePath: path.join(this._path, 'tmp/html/GamePush-Plugin'),
-      htmlFileName: `${game}_${Date.now()}.html`,
+      htmlFileName: `${game}__${type}_${currentDate}.html`,
       yunzaiName: cfg.package.name === 'miao-yunzai' ? 'Miao-Yunzai' : cfg.package.name === 'trss-yunzai' ? 'TRSS-Yunzai' : _.capitalize(cfg.package.name)
     }
 
