@@ -155,19 +155,18 @@ class Config {
    */
   saveFromFrontend (data, { Result }) {
     try {
-      const validConfig = GAME_IDS.reduce((config, gameId) => {
-        if (data[gameId]) {
-          config[gameId] = {
-            enable: !!data[gameId].enable,
-            cron: data[gameId].cron || DEFAULT_CRON,
-            pushGroups: normalizeGroups(data[gameId].pushGroups),
-            pushChangeType: data[gameId].pushChangeType || '1'
-          }
+      const saveData = GAME_IDS.reduce((result, gameId) => {
+        const enable = data[`${gameId}.enable`] ?? this.configCache[gameId].enable
+        result[gameId] = {
+          enable,
+          cron: data[`${gameId}.cron`] || DEFAULT_CRON,
+          pushGroups: normalizeGroups(data[`${gameId}.pushGroups`]),
+          pushChangeType: data[`${gameId}.pushChangeType`] || '1'
         }
-        return config
+        return result
       }, {})
-      this.saveConfig(validConfig)
-      return { success: true, message: '配置保存成功' }
+      this.saveConfig(saveData)
+      return { success: true, message: '游戏推送配置已保存！' }
     } catch (err) {
       logger.error('[GamePush-Plugin] 前端配置保存失败', err)
       return { success: false, message: `配置保存失败: ${err.message}` }
@@ -175,5 +174,4 @@ class Config {
   }
 }
 
-const cfg = new Config()
-export default cfg
+export default new Config()

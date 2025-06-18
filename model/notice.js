@@ -112,7 +112,6 @@ class Notifier extends base {
         }
       }
 
-      // 准备推送数据
       const templateData = {
         gameName,
         oldVersion,
@@ -174,5 +173,4 @@ class Notifier extends base {
   }
 }
 
-const notice = new Notifier()
-export default notice
+export default new Notifier()

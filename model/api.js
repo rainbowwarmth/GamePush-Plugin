@@ -186,5 +186,4 @@ class ApiTools extends base {
   }
 }
 
-const api = new ApiTools()
-export default api
+export default new ApiTools()

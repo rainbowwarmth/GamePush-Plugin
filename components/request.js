@@ -106,5 +106,4 @@ class Request {
   }
 }
 
-const request = new Request()
-export default request
+export default new Request()

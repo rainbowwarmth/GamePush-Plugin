@@ -3,7 +3,7 @@ import { api, getGameAPI, getGameName, versionComparator } from '#GamePush.model
 
 class Download {
   cache = new Map()
-  cacheTTL = 30000 // 缓存有效期30秒
+  cacheTTL = 30000
 
   /**
    * 获取下载数据
@@ -206,5 +206,4 @@ class Download {
   }
 }
 
-const download = new Download()
-export default download
+export default new Download()
