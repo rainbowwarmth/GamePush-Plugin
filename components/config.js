@@ -1,14 +1,9 @@
 import fs from 'node:fs'
 import YAML from 'yaml'
 import path from 'node:path'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 const CONFIG_DIR = path.join(process.cwd(), 'data')
 const CONFIG_PATH = path.join(CONFIG_DIR, 'GamePush-Plugin.yaml')
-
 const DEFAULT_CRON = '0 0/5 * * * *'
 const GAME_IDS = ['ys', 'sr', 'zzz', 'bh3', 'ww']
 
