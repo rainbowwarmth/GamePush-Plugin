@@ -122,14 +122,12 @@ class Notifier extends base {
    */
   async sendImageMessage (type, game, gameConfig, templateData) {
     try {
-      console.log(type)
       const img = await puppeteer.screenshot('GamePush-Plugin', {
         ...this.screenData(game, type),
         messages: this.templateMap[type](templateData),
         date: new Date().toLocaleDateString(),
         type
       })
-
       api.sendToGroups(img, game, gameConfig)
     } catch (err) {
       logger.error(`[GamePush-Plugin] 发送图片消息失败: ${err.message}`, err)
@@ -147,9 +145,7 @@ class Notifier extends base {
     try {
       const template = this.textTemplateMap[type]
       if (!template) throw new Error(`未知的推送类型: ${type}`)
-
       const content = template(templateData)
-
       api.sendToGroups(content, game, gameConfig)
     } catch (err) {
       logger.error(`[GamePush-Plugin] 发送文本消息失败: ${err.message}`, err)

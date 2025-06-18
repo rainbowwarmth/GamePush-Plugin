@@ -45,11 +45,11 @@ export default class base {
    * @returns {string} 当前日期，格式为YYYYMMDD
    */
   getCurrentDate() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    return `${year}${month}${day}`; // 示例：20240618
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = (now.getMonth() + 1).toString().padStart(2, '0')
+    const day = now.getDate().toString().padStart(2, '0')
+    return `${year}${month}${day}`
   }
 
   /**
@@ -77,7 +77,7 @@ export default class base {
       fontsPath: path.join(this._path, 'plugins/GamePush-Plugin/resources/fonts/'),
       pluResPath: path.join(this._path, 'plugins/GamePush-Plugin/resources/'),
       htmlSavePath: path.join(this._path, 'tmp/html/GamePush-Plugin'),
-      htmlFileName: `${game}__${type}_${currentDate}.html`,
+      htmlFileName: `${game}_${type}_${currentDate}.html`,
       yunzaiName: cfg.package.name === 'miao-yunzai' ? 'Miao-Yunzai' : cfg.package.name === 'trss-yunzai' ? 'TRSS-Yunzai' : _.capitalize(cfg.package.name)
     }
 
