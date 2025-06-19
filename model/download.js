@@ -22,7 +22,7 @@ class Download {
     const data = await this.fetchDownloadData(game, type)
     this.cache.set(cacheKey, {
       timestamp: Date.now(),
-      data,
+      data
     })
 
     return data
@@ -41,7 +41,7 @@ class Download {
       const data = await request.get(apiUrl, {
         responseType: "json",
         log: true,
-        gameName: getGameName(game),
+        gameName: getGameName(game)
       })
 
       if (game === "ww") {
@@ -53,7 +53,7 @@ class Download {
       return {
         data: null,
         patch: { game_pkgs: [], audio_pkgs: [] },
-        type,
+        type
       }
     }
   }
@@ -72,7 +72,7 @@ class Download {
       return {
         data: null,
         patch: { game_pkgs: [] },
-        type,
+        type
       }
     }
 
@@ -87,25 +87,25 @@ class Download {
         {
           url: mainUrl,
           md5: versionData.indexFileMd5 || "",
-          size: versionData.size || 0,
-        },
-      ],
+          size: versionData.size || 0
+        }
+      ]
     }
 
     const patchPkgs = (versionData.patchConfig || [])
       .sort((a, b) => versionComparator.compare(b.version, a.version))
-      .filter(patch => patch.indexFile)
-      .map(patch => ({
+      .filter((patch) => patch.indexFile)
+      .map((patch) => ({
         url: `${cdn}/${patch.indexFile.replace(/^\//, "")}`,
         md5: patch.indexFileMd5 || "",
         size: patch.size || 0,
-        version: patch.version,
+        version: patch.version
       }))
 
     return {
       data: mainMajor,
       patch: { game_pkgs: patchPkgs },
-      type,
+      type
     }
   }
 
@@ -118,7 +118,7 @@ class Download {
   handleMHYData(data, type) {
     const packageData = data?.data?.game_packages?.[0] || {}
 
-    const safeGetPatch = patchArray => {
+    const safeGetPatch = (patchArray) => {
       return patchArray?.[0] || { game_pkgs: [], audio_pkgs: [] }
     }
 
@@ -129,7 +129,7 @@ class Download {
       return {
         data: preData,
         patch: prePatch,
-        type,
+        type
       }
     } else {
       const mainData = packageData?.main?.major || {}
@@ -138,7 +138,7 @@ class Download {
       return {
         data: mainData,
         patch: mainPatch,
-        type,
+        type
       }
     }
   }
@@ -159,31 +159,31 @@ class Download {
     const msg = [
       `${gameName} ${typeText}下载信息`,
       `版本: ${version}`,
-      "请选择需要的下载内容",
+      "请选择需要的下载内容"
     ].join("\n")
 
     const clent = this.formatPackageInfo(
       data.game_pkgs,
       `${gameName} ${typeText}${game === "bh3" ? "游戏下载" : "游戏分卷包下载"}`,
-      `${game === "bh3" ? "游戏下载" : "游戏分卷包下载"}`,
+      `${game === "bh3" ? "游戏下载" : "游戏分卷包下载"}`
     )
 
     const audio = this.formatPackageInfo(
       data.audio_pkgs,
       `${gameName} ${typeText}音频下载`,
-      "音频包",
+      "音频包"
     )
 
     const patch_clent = this.formatPackageInfo(
       patch?.game_pkgs,
       `${gameName} ${typeText}游戏增量包下载`,
-      "游戏增量包",
+      "游戏增量包"
     )
 
     const patch_audio = this.formatPackageInfo(
       patch?.audio_pkgs,
       `${gameName} ${typeText}音频增量包下载`,
-      "音频增量包",
+      "音频增量包"
     )
 
     return { msg, clent, audio, patch_clent, patch_audio }

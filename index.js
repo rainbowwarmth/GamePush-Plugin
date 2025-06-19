@@ -1,9 +1,11 @@
-import fs from 'node:fs'
+import fs from "node:fs"
 
-logger.info('GamePush-Plugin 加载中')
-logger.info('Created By rainbowwarmth')
+logger.info("GamePush-Plugin 加载中")
+logger.info("Created By rainbowwarmth")
 
-const files = fs.readdirSync('./plugins/GamePush-Plugin/apps').filter(file => file.endsWith('.js'))
+const files = fs
+  .readdirSync("./plugins/GamePush-Plugin/apps")
+  .filter((file) => file.endsWith(".js"))
 
 let ret = []
 
@@ -15,9 +17,9 @@ ret = await Promise.allSettled(ret)
 
 let apps = {}
 for (let i in files) {
-  let name = files[i].replace('.js', '')
+  let name = files[i].replace(".js", "")
 
-  if (ret[i].status != 'fulfilled') {
+  if (ret[i].status != "fulfilled") {
     logger.error(`载入插件错误：${logger.red(name)}`)
     logger.error(ret[i].reason)
     continue

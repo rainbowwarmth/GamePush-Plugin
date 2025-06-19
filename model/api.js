@@ -6,7 +6,7 @@ import {
   getGameName,
   getRedisKeys,
   GAME_CONFIG,
-  versionComparator,
+  versionComparator
 } from "#GamePush.model"
 
 class ApiTools extends base {
@@ -14,7 +14,7 @@ class ApiTools extends base {
 
   constructor() {
     super()
-    Object.keys(GAME_CONFIG).forEach(game => {
+    Object.keys(GAME_CONFIG).forEach((game) => {
       this.gameApis.set(game, getGameChuckAPI(game))
     })
   }
@@ -48,7 +48,7 @@ class ApiTools extends base {
       const data = await request.get(apiUrl, {
         responseType: "json",
         log: true,
-        gameName: getGameName(game),
+        gameName: getGameName(game)
       })
 
       if (game === "ww") {
@@ -109,7 +109,7 @@ class ApiTools extends base {
         game,
         newVersion: currentVersion,
         oldVersion: stored,
-        pushChangeType: cfg.getGameConfig(game).pushChangeType,
+        pushChangeType: cfg.getGameConfig(game).pushChangeType
       })
     }
   }
@@ -132,7 +132,7 @@ class ApiTools extends base {
           game,
           newVersion: currentPre,
           oldVersion: storedPre,
-          pushChangeType: cfg.getGameConfig(game).pushChangeType,
+          pushChangeType: cfg.getGameConfig(game).pushChangeType
         })
       }
     } else if (storedPre) {
@@ -141,7 +141,7 @@ class ApiTools extends base {
         type: "pre-remove",
         game,
         oldVersion: storedPre,
-        pushChangeType: cfg.getGameConfig(game).pushChangeType,
+        pushChangeType: cfg.getGameConfig(game).pushChangeType
       })
     }
   }

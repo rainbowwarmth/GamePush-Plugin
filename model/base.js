@@ -36,7 +36,7 @@ export default class base {
       ys: "原神",
       zzz: "绝区零",
       bh3: "崩坏3",
-      ww: "鸣潮",
+      ww: "鸣潮"
     }
     return gameNames[game] || "未知游戏"
   }
@@ -75,7 +75,7 @@ export default class base {
       cwd: this._path,
       tplFile: path.join(
         this._path,
-        "plugins/GamePush-Plugin/resources/html/GamePush-Plugin/GamePush-Plugin.html",
+        "plugins/GamePush-Plugin/resources/html/GamePush-Plugin/GamePush-Plugin.html"
       ),
       fontsPath: path.join(this._path, "plugins/GamePush-Plugin/resources/fonts/"),
       pluResPath: path.join(this._path, "plugins/GamePush-Plugin/resources/"),
@@ -86,7 +86,7 @@ export default class base {
           ? "Miao-Yunzai"
           : cfg.package.name === "trss-yunzai"
             ? "TRSS-Yunzai"
-            : _.capitalize(cfg.package.name),
+            : _.capitalize(cfg.package.name)
     }
 
     const icons = {
@@ -94,13 +94,13 @@ export default class base {
       sr: "https://c-ssl.duitang.com/uploads/blog/202110/11/20211011094243_6ff48.jpeg",
       ys: "https://bbs-static.miyoushe.com/avatar/avatar10011.png",
       bh3: "https://www.miyoushe.com/_static/img/game-bh3.abe5ead.jpg",
-      ww: "https://cn.bing.com/th?id=OSK.d2e8b2efa5867fba330b354d0472f5e5&w=120&h=120&qlt=120&c=6&rs=1&cdv=1&pid=RS",
+      ww: "https://cn.bing.com/th?id=OSK.d2e8b2efa5867fba330b354d0472f5e5&w=120&h=120&qlt=120&c=6&rs=1&cdv=1&pid=RS"
     }
 
     return {
       ...basic,
       gameName: this.getGameName(game),
-      icon: icons[game],
+      icon: icons[game]
     }
   }
 }

@@ -14,33 +14,33 @@ export class bh3Push extends plugin {
         {
           reg: `^#*${bh3Reg}版本监控$`,
           fnc: "bh3Check",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${bh3Reg}(开启|关闭)版本推送$`,
           fnc: "bh3PushSet",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${bh3Reg}当前版本$`,
-          fnc: "bh3Ver",
+          fnc: "bh3Ver"
         },
         {
           reg: `^#*${bh3Reg}获取下载链接$`,
-          fnc: "bh3DownloadLinks",
+          fnc: "bh3DownloadLinks"
         },
         {
           reg: `^#*${bh3Reg}获取预下载链接$`,
-          fnc: "bh3PreDownloadLinks",
-        },
-      ],
+          fnc: "bh3PreDownloadLinks"
+        }
+      ]
     })
 
     this.task = {
       cron: cfg.getGameConfig("bh3").cron || "0 0/5 * * * *",
       name: "[GamePush-Plugin] 崩坏3版本监控",
       fnc: () => api.autoCheck("bh3"),
-      log: false,
+      log: false
     }
   }
 
@@ -64,14 +64,14 @@ export class bh3Push extends plugin {
 
     const isEnable = e.msg.includes("开启")
 
-    cfg.updateGameConfig("bh3", config => {
+    cfg.updateGameConfig("bh3", (config) => {
       config.pushGroups = config.pushGroups || []
       if (isEnable) {
         if (!config.pushGroups.includes(groupId)) {
           config.pushGroups.push(groupId)
         }
       } else {
-        config.pushGroups = config.pushGroups.filter(id => id !== groupId)
+        config.pushGroups = config.pushGroups.filter((id) => id !== groupId)
       }
       config.enable = isEnable
       config.cron = config.cron || "0 0/5 * * * *"
@@ -92,7 +92,7 @@ export class bh3Push extends plugin {
     const msg = [
       "📌 崩坏3当前版本信息",
       `正式版本：${mainVer || "未知"}`,
-      `预下载版本：${preVer || "未开启"}`,
+      `预下载版本：${preVer || "未开启"}`
     ].join("\n")
 
     return this.reply(msg, true)
@@ -110,7 +110,7 @@ export class bh3Push extends plugin {
         "bh3",
         data,
         "main",
-        patch,
+        patch
       )
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
@@ -130,7 +130,7 @@ export class bh3Push extends plugin {
         "bh3",
         data,
         "pre",
-        patch,
+        patch
       )
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {

@@ -14,25 +14,25 @@ export class ysPush extends plugin {
         {
           reg: `^#*${ysReg}?版本监控$`,
           fnc: "ysCheck",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${ysReg}?(开启|关闭)版本推送$`,
           fnc: "ysPushSet",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${ysReg}?当前版本$`,
-          fnc: "ysVer",
-        },
-      ],
+          fnc: "ysVer"
+        }
+      ]
     })
 
     this.task = {
       cron: cfg.getGameConfig("ys").cron || "0 0/5 * * * *",
       name: "[GamePush-Plugin] 原神版本监控",
       fnc: () => api.autoCheck("ys"),
-      log: false,
+      log: false
     }
   }
 
@@ -57,7 +57,7 @@ export class ysPush extends plugin {
 
     const isEnable = e.msg.includes("开启")
 
-    cfg.updateGameConfig("ys", config => {
+    cfg.updateGameConfig("ys", (config) => {
       config.pushGroups = config.pushGroups || []
 
       if (isEnable) {
@@ -65,7 +65,7 @@ export class ysPush extends plugin {
           config.pushGroups.push(groupId)
         }
       } else {
-        config.pushGroups = config.pushGroups.filter(id => id !== groupId)
+        config.pushGroups = config.pushGroups.filter((id) => id !== groupId)
       }
 
       config.enable = isEnable
@@ -87,7 +87,7 @@ export class ysPush extends plugin {
     const msg = [
       "📌 原神当前版本信息",
       `正式版本：${mainVer || "未知"}`,
-      `预下载版本：${preVer || "未开启"}`,
+      `预下载版本：${preVer || "未开启"}`
     ].join("\n")
 
     return this.reply(msg, true)

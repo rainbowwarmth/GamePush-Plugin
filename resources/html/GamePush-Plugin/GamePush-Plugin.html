@@ -1,26 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
-  <link rel="shortcut icon" href="#"/>
-  <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/GamePush-Plugin/GamePush-Plugin.css"/>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img class="game-icon" src="{{icon}}">
-      <h1 class="title">{{gameName}}更新通知</h1>
-    </div>
-    
-    <div class="message-list">
-    {{ each messages }}
-       <div class="message-item"><%- $value %></div>
-      {{ /each }}
-    </div>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <link rel="shortcut icon" href="#" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{pluResPath}}html/GamePush-Plugin/GamePush-Plugin.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img class="game-icon" src="{{icon}}" />
+        <h1 class="title">{{gameName}}更新通知</h1>
+      </div>
 
-    <div class="footer">
-      Created by {{yunzaiName}} & GamePush-Plugin • {{date}}
+      <div class="message-list">
+        {{ each messages }}
+        <div class="message-item"><%- $value %></div>
+        {{ /each }}
+      </div>
+
+      <div class="footer">Created by {{yunzaiName}} & GamePush-Plugin • {{date}}</div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

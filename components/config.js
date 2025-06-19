@@ -49,7 +49,7 @@ class Config {
         enable: true,
         cron: DEFAULT_CRON,
         pushGroups: [],
-        pushChangeType: "1",
+        pushChangeType: "1"
       }
       return config
     }, {})
@@ -68,7 +68,7 @@ class Config {
             enable: !!raw[gameId].enable,
             cron: raw[gameId].cron || DEFAULT_CRON,
             pushGroups: normalizeGroups(raw[gameId].pushGroups),
-            pushChangeType: raw[gameId].pushChangeType || "1",
+            pushChangeType: raw[gameId].pushChangeType || "1"
           }
         }
         return validated
@@ -152,7 +152,7 @@ class Config {
           enable,
           cron: data[`${gameId}.cron`] || DEFAULT_CRON,
           pushGroups: normalizeGroups(data[`${gameId}.pushGroups`]),
-          pushChangeType: data[`${gameId}.pushChangeType`] || "1",
+          pushChangeType: data[`${gameId}.pushChangeType`] || "1"
         }
         return result
       }, {})

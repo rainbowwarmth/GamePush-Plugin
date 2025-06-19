@@ -7,7 +7,7 @@ const gameInfoMap = {
   星铁: { id: "sr", display: "星铁" },
   绝区零: { id: "zzz", display: "绝区零" },
   崩三: { id: "bh3", display: "崩坏3" },
-  鸣潮: { id: "ww", display: "鸣潮" },
+  鸣潮: { id: "ww", display: "鸣潮" }
 }
 
 export class Set extends plugin {
@@ -21,30 +21,30 @@ export class Set extends plugin {
         {
           reg: `^#*${Reg}删除rediskey$`,
           fnc: "delkey",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${Reg}删除预下载rediskey$`,
           fnc: "delPrekey",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${Reg}设置rediskey\\s*(.+)$`,
           fnc: "setkey",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${Reg}设置预下载rediskey\\s*(.+)$`,
           fnc: "setPrekey",
-          permission: "master",
-        },
-      ],
+          permission: "master"
+        }
+      ]
     })
   }
 
   async delkey() {
     try {
-      const match = Object.keys(gameInfoMap).find(k => this.e.msg.includes(k))
+      const match = Object.keys(gameInfoMap).find((k) => this.e.msg.includes(k))
       if (!match) return this.e.reply("未找到匹配的游戏类型")
 
       const { id, display } = gameInfoMap[match]
@@ -63,7 +63,7 @@ export class Set extends plugin {
 
   async delPrekey() {
     try {
-      const match = Object.keys(gameInfoMap).find(k => this.e.msg.includes(k))
+      const match = Object.keys(gameInfoMap).find((k) => this.e.msg.includes(k))
       if (!match) return this.e.reply("未找到匹配的游戏类型")
 
       const { id, display } = gameInfoMap[match]
@@ -82,7 +82,7 @@ export class Set extends plugin {
 
   async setkey() {
     try {
-      const match = Object.keys(gameInfoMap).find(k => this.e.msg.includes(k))
+      const match = Object.keys(gameInfoMap).find((k) => this.e.msg.includes(k))
       if (!match) return this.e.reply("未找到匹配的游戏类型")
 
       const { id, display } = gameInfoMap[match]
@@ -104,7 +104,7 @@ export class Set extends plugin {
 
   async setPrekey() {
     try {
-      const match = Object.keys(gameInfoMap).find(k => this.e.msg.includes(k))
+      const match = Object.keys(gameInfoMap).find((k) => this.e.msg.includes(k))
       if (!match) return this.e.reply("未找到匹配的游戏类型")
 
       const { id, display } = gameInfoMap[match]

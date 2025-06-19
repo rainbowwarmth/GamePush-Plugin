@@ -14,33 +14,33 @@ export class zzzPush extends plugin {
         {
           reg: `^#*${zzzReg}版本监控$`,
           fnc: "zzzCheck",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${zzzReg}(开启|关闭)版本推送$`,
           fnc: "zzzPushSet",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${zzzReg}当前版本$`,
-          fnc: "zzzVer",
+          fnc: "zzzVer"
         },
         {
           reg: `^#*${zzzReg}获取下载链接$`,
-          fnc: "zzzDownloadLinks",
+          fnc: "zzzDownloadLinks"
         },
         {
           reg: `^#*${zzzReg}获取预下载链接$`,
-          fnc: "zzzPreDownloadLinks",
-        },
-      ],
+          fnc: "zzzPreDownloadLinks"
+        }
+      ]
     })
 
     this.task = {
       cron: cfg.getGameConfig("zzz").cron || "0 0/5 * * * *",
       name: "[GamePush-Plugin] 绝区零版本监控",
       fnc: () => api.autoCheck("zzz"),
-      log: false,
+      log: false
     }
   }
 
@@ -64,14 +64,14 @@ export class zzzPush extends plugin {
 
     const isEnable = e.msg.includes("开启")
 
-    cfg.updateGameConfig("zzz", config => {
+    cfg.updateGameConfig("zzz", (config) => {
       config.pushGroups = config.pushGroups || []
       if (isEnable) {
         if (!config.pushGroups.includes(groupId)) {
           config.pushGroups.push(groupId)
         }
       } else {
-        config.pushGroups = config.pushGroups.filter(id => id !== groupId)
+        config.pushGroups = config.pushGroups.filter((id) => id !== groupId)
       }
       config.enable = isEnable
       config.cron = config.cron || "0 0/5 * * * *"
@@ -92,7 +92,7 @@ export class zzzPush extends plugin {
     const msg = [
       "📌 绝区零当前版本信息",
       `正式版本：${mainVer || "未知"}`,
-      `预下载版本：${preVer || "未开启"}`,
+      `预下载版本：${preVer || "未开启"}`
     ].join("\n")
 
     return this.reply(msg, true)
@@ -111,7 +111,7 @@ export class zzzPush extends plugin {
         "zzz",
         data,
         "main",
-        patch,
+        patch
       )
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
@@ -131,7 +131,7 @@ export class zzzPush extends plugin {
         "zzz",
         data,
         "pre",
-        patch,
+        patch
       )
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {

@@ -14,33 +14,33 @@ export class wwPush extends plugin {
         {
           reg: `^#*${wwReg}版本监控$`,
           fnc: "wwCheck",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${wwReg}(开启|关闭)版本推送$`,
           fnc: "wwPushSet",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${wwReg}当前版本$`,
-          fnc: "wwVer",
+          fnc: "wwVer"
         },
         {
           reg: `^#*${wwReg}获取下载链接$`,
-          fnc: "wwDownloadLinks",
+          fnc: "wwDownloadLinks"
         },
         {
           reg: `^#*${wwReg}获取预下载链接$`,
-          fnc: "wwPreDownloadLinks",
-        },
-      ],
+          fnc: "wwPreDownloadLinks"
+        }
+      ]
     })
 
     this.task = {
       cron: cfg.getGameConfig("ww").cron || "0 0/5 * * * *",
       name: "[GamePush-Plugin] 鸣潮版本监控",
       fnc: () => api.autoCheck("ww"),
-      log: false,
+      log: false
     }
   }
 
@@ -64,14 +64,14 @@ export class wwPush extends plugin {
 
     const isEnable = e.msg.includes("开启")
 
-    cfg.updateGameConfig("ww", config => {
+    cfg.updateGameConfig("ww", (config) => {
       config.pushGroups = config.pushGroups || []
       if (isEnable) {
         if (!config.pushGroups.includes(groupId)) {
           config.pushGroups.push(groupId)
         }
       } else {
-        config.pushGroups = config.pushGroups.filter(id => id !== groupId)
+        config.pushGroups = config.pushGroups.filter((id) => id !== groupId)
       }
       config.enable = isEnable
       config.cron = config.cron || "0 0/5 * * * *"
@@ -92,7 +92,7 @@ export class wwPush extends plugin {
     const msg = [
       "📌 鸣潮当前版本信息",
       `正式版本：${mainVer || "未知"}`,
-      `预下载版本：${preVer || "未开启"}`,
+      `预下载版本：${preVer || "未开启"}`
     ].join("\n")
 
     return this.reply(msg, true)

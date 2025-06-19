@@ -16,7 +16,7 @@ class Request {
     const requestOptions = {
       method,
       headers: Headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: body ? JSON.stringify(body) : undefined
     }
 
     return requestOptions

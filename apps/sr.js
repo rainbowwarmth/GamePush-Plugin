@@ -14,33 +14,33 @@ export class srPush extends plugin {
         {
           reg: `^#*${srReg}版本监控$`,
           fnc: "srCheck",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${srReg}(开启|关闭)版本推送$`,
           fnc: "srPushSet",
-          permission: "master",
+          permission: "master"
         },
         {
           reg: `^#*${srReg}当前版本$`,
-          fnc: "srVer",
+          fnc: "srVer"
         },
         {
           reg: `^#*${srReg}获取下载链接$`,
-          fnc: "srDownloadLinks",
+          fnc: "srDownloadLinks"
         },
         {
           reg: `^#*${srReg}获取预下载链接$`,
-          fnc: "srPreDownloadLinks",
-        },
-      ],
+          fnc: "srPreDownloadLinks"
+        }
+      ]
     })
 
     this.task = {
       cron: cfg.getGameConfig("sr").cron || "0 0/5 * * * *",
       name: "[GamePush-Plugin] 星铁版本监控",
       fnc: () => api.autoCheck("sr"),
-      log: false,
+      log: false
     }
   }
 
@@ -65,7 +65,7 @@ export class srPush extends plugin {
 
     const isEnable = e.msg.includes("开启")
 
-    cfg.updateGameConfig("sr", config => {
+    cfg.updateGameConfig("sr", (config) => {
       config.pushGroups = config.pushGroups || []
 
       if (isEnable) {
@@ -73,7 +73,7 @@ export class srPush extends plugin {
           config.pushGroups.push(groupId)
         }
       } else {
-        config.pushGroups = config.pushGroups.filter(id => id !== groupId)
+        config.pushGroups = config.pushGroups.filter((id) => id !== groupId)
       }
 
       config.enable = isEnable
@@ -95,7 +95,7 @@ export class srPush extends plugin {
     const msg = [
       "📌 星铁当前版本信息",
       `正式版本：${mainVer || "未知"}`,
-      `预下载版本：${preVer || "未开启"}`,
+      `预下载版本：${preVer || "未开启"}`
     ].join("\n")
 
     return this.reply(msg, true)
@@ -113,7 +113,7 @@ export class srPush extends plugin {
         "sr",
         data,
         "main",
-        patch,
+        patch
       )
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
@@ -134,7 +134,7 @@ export class srPush extends plugin {
         "sr",
         data,
         "pre",
-        patch,
+        patch
       )
       return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {

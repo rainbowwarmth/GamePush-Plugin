@@ -12,13 +12,13 @@ class Notifier extends base {
       ...(gameName !== "原神" && gameName !== "崩坏3"
         ? [
             incrementalSize &&
-              `<span class="emoji-text">🔄</span> 增量更新大小：约${incrementalSize}`,
+              `<span class="emoji-text">🔄</span> 增量更新大小：约${incrementalSize}`
           ]
         : []),
       '<span class="emoji-text">📢</span> 请及时更新客户端',
       ...(gameName !== "原神"
         ? [`<span class="emoji-text">💾</span> 发送【#${gameName}获取下载链接】获取客户端`]
-        : []),
+        : [])
     ],
 
     pre: ({ gameName, newVersion, formattedTotalSize, incrementalSize }) => [
@@ -27,25 +27,25 @@ class Notifier extends base {
       ...(gameName !== "原神"
         ? [
             formattedTotalSize &&
-              `<span class="emoji-text">📦</span> 完整大小（含中文语音）：${formattedTotalSize}`,
+              `<span class="emoji-text">📦</span> 完整大小（含中文语音）：${formattedTotalSize}`
           ]
         : []),
       ...(gameName !== "崩坏3"
         ? [
             incrementalSize &&
-              `<span class="emoji-text">🔄</span> 增量更新大小：约${incrementalSize}`,
+              `<span class="emoji-text">🔄</span> 增量更新大小：约${incrementalSize}`
           ]
         : []),
       '<span class="emoji-text">📥</span> 请提前下载游戏资源',
       ...(gameName !== "原神"
         ? [`<span class="emoji-text">🚪</span> 发送【#${gameName}获取预下载链接】获取链接`]
-        : []),
+        : [])
     ],
 
     "pre-remove": ({ gameName, oldVersion }) => [
       `<span class="emoji-text">🌙</span> ${gameName}预下载资源已关闭`,
-      `<span class="emoji-text">🔒</span> 正式版本${oldVersion}即将上线`,
-    ],
+      `<span class="emoji-text">🔒</span> 正式版本${oldVersion}即将上线`
+    ]
   }
 
   textTemplateMap = {
@@ -58,7 +58,7 @@ class Notifier extends base {
           ? [incrementalSize && `🔄 增量更新大小：约${incrementalSize}`]
           : []),
         "📢 请及时更新客户端",
-        ...(gameName !== "原神" ? [`💾 发送【#${gameName}获取下载链接】获取客户端`] : []),
+        ...(gameName !== "原神" ? [`💾 发送【#${gameName}获取下载链接】获取客户端`] : [])
       ]
       return parts.filter(Boolean).join("\n")
     },
@@ -74,13 +74,13 @@ class Notifier extends base {
           ? [incrementalSize && `🔄 增量更新大小：约${incrementalSize}`]
           : []),
         "📥请提前下载游戏资源",
-        ...(gameName !== "原神" ? [`💾 发送【#${gameName}获取预下载链接】获取客户端`] : []),
+        ...(gameName !== "原神" ? [`💾 发送【#${gameName}获取预下载链接】获取客户端`] : [])
       ]
       return parts.filter(Boolean).join("\n")
     },
 
     "pre-remove": ({ gameName, oldVersion }) =>
-      [`🌙${gameName}预下载资源已关闭`, `🔒正式版本${oldVersion}即将上线`].join("\n"),
+      [`🌙${gameName}预下载资源已关闭`, `🔒正式版本${oldVersion}即将上线`].join("\n")
   }
 
   /**
@@ -98,7 +98,7 @@ class Notifier extends base {
         let BranchesData = await request.get(BranchesUrl, {
           responseType: "json",
           log: true,
-          gameName,
+          gameName
         })
         let chucksizeApi
         let data
@@ -109,7 +109,7 @@ class Notifier extends base {
           chucksizeApi = getDownloadAPI(
             type,
             BranchesData?.data?.game_branches?.[0]?.pre_download?.package_id,
-            BranchesData?.data?.game_branches?.[0]?.pre_download?.password,
+            BranchesData?.data?.game_branches?.[0]?.pre_download?.password
           )
           data = await request.post(chucksizeApi, { responseType: "json", log: true, gameName })
           PreSize += parseInt(data?.data?.manifests?.[0]?.stats[Version]?.uncompressed_size, 10)
@@ -119,7 +119,7 @@ class Notifier extends base {
           chucksizeApi = getDownloadAPI(
             type,
             BranchesData?.data?.game_branches?.[0]?.main?.package_id,
-            BranchesData?.data?.game_branches?.[0]?.main?.password,
+            BranchesData?.data?.game_branches?.[0]?.main?.password
           )
           data = await request.get(chucksizeApi, { responseType: "json", log: true, gameName })
           mainSize += parseInt(data?.data?.manifests[0]?.deduplicated_stats?.uncompressed_size, 10)
@@ -139,7 +139,7 @@ class Notifier extends base {
         oldVersion,
         newVersion,
         formattedTotalSize,
-        incrementalSize,
+        incrementalSize
       }
 
       if (pushChangeType === "1") {
@@ -165,7 +165,7 @@ class Notifier extends base {
         ...this.screenData(game, type),
         messages: this.templateMap[type](templateData),
         date: new Date().toLocaleDateString(),
-        type,
+        type
       })
       api.sendToGroups(img, game, gameConfig)
     } catch (err) {

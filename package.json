@@ -7,9 +7,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "prettier --config .prettierrc.js --write --list-different ./*/*.js",
-    "format": "eslint --fix \"src/**/*.js\""
+    "lint": "eslint --ext .js,.vue src",
+    "format": "prettier --write \"./**/*.{js,vue}\"",
+    "fix": "eslint --fix --ext .js && npm run format"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,14 @@
   },
   "keywords": [],
   "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-prettier": "^5.5.0",
+    "eslint-plugin-promise": "^6.6.0",
+    "eslint-plugin-vue": "^10.2.0",
     "prettier": "^3.5.3"
   },
   "imports": {
