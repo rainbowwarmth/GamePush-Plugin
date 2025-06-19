@@ -1,10 +1,18 @@
-import { cfg, request } from '#GamePush.components'
-import { base, notice, getGameChuckAPI, getGameName, getRedisKeys, GAME_CONFIG, versionComparator } from '#GamePush.model'
+import { cfg, request } from "#GamePush.components"
+import {
+  base,
+  notice,
+  getGameChuckAPI,
+  getGameName,
+  getRedisKeys,
+  GAME_CONFIG,
+  versionComparator,
+} from "#GamePush.model"
 
 class ApiTools extends base {
   gameApis = new Map()
 
-  constructor () {
+  constructor() {
     super()
     Object.keys(GAME_CONFIG).forEach(game => {
       this.gameApis.set(game, getGameChuckAPI(game))
@@ -15,7 +23,7 @@ class ApiTools extends base {
    * 自动检查游戏版本
    * @param {string} game - 游戏ID
    */
-  async autoCheck (game = '') {
+  async autoCheck(game = "") {
     try {
       const gameConfig = cfg.getGameConfig(game)
       if (gameConfig.enable) {
@@ -31,15 +39,19 @@ class ApiTools extends base {
    * @param {boolean} auto - 是否自动检查
    * @param {string} game - 游戏ID
    */
-  async checkVersion (auto = false, game = '') {
+  async checkVersion(auto = false, game = "") {
     if (!game || !GAME_CONFIG[game]) {
       throw new Error(`[GamePush-Plugin] 无效的游戏标识: ${game}`)
     }
     try {
       const apiUrl = this.gameApis.get(game)
-      const data = await request.get(apiUrl, { responseType: 'json', log: true, gameName: getGameName(game) })
+      const data = await request.get(apiUrl, {
+        responseType: "json",
+        log: true,
+        gameName: getGameName(game),
+      })
 
-      if (game === 'ww') {
+      if (game === "ww") {
         await this.processWWData(data, game, auto)
       } else {
         await this.processMHYData(data, game, auto)
@@ -56,20 +68,12 @@ class ApiTools extends base {
    * @param {string} game - 游戏ID
    * @param {boolean} auto - 是否自动检查
    */
-  async processWWData (data, game, auto) {
+  async processWWData(data, game, auto) {
     const gameCheckData = data
 
-    await this.processMainVersion(
-      game,
-      gameCheckData.default?.config?.version,
-      auto
-    )
+    await this.processMainVersion(game, gameCheckData.default?.config?.version, auto)
 
-    await this.processPreDownload(
-      game,
-      gameCheckData.predownload?.config,
-      auto
-    )
+    await this.processPreDownload(game, gameCheckData.predownload?.config, auto)
   }
 
   /**
@@ -78,21 +82,13 @@ class ApiTools extends base {
    * @param {string} game - 游戏ID
    * @param {boolean} auto - 是否自动检查
    */
-  async processMHYData (data, game, auto) {
+  async processMHYData(data, game, auto) {
     const gameCheckData = data?.data?.game_branches?.[0]
     if (!gameCheckData) throw new Error(`${getGameName(game)}游戏数据解析失败`)
 
-    await this.processMainVersion(
-      game,
-      gameCheckData.main?.tag,
-      auto
-    )
+    await this.processMainVersion(game, gameCheckData.main?.tag, auto)
 
-    await this.processPreDownload(
-      game,
-      gameCheckData.pre_download,
-      auto
-    )
+    await this.processPreDownload(game, gameCheckData.pre_download, auto)
   }
 
   /**
@@ -100,20 +96,20 @@ class ApiTools extends base {
    * @param {string} game - 游戏ID
    * @param {string} currentVersion - 当前版本
    */
-  async processMainVersion (game, currentVersion) {
+  async processMainVersion(game, currentVersion) {
     if (!currentVersion) return
 
     const { main: redisKey } = getRedisKeys(game)
-    const stored = await redis.get(redisKey) || '0.0.0'
+    const stored = (await redis.get(redisKey)) || "0.0.0"
 
     if (versionComparator.compare(currentVersion, stored) > 0) {
       await redis.set(redisKey, currentVersion)
       notice.pushNotify({
-        type: 'main',
+        type: "main",
         game,
         newVersion: currentVersion,
         oldVersion: stored,
-        pushChangeType: cfg.getGameConfig(game).pushChangeType
+        pushChangeType: cfg.getGameConfig(game).pushChangeType,
       })
     }
   }
@@ -123,29 +119,29 @@ class ApiTools extends base {
    * @param {string} game - 游戏ID
    * @param {Object} preData - 预下载数据
    */
-  async processPreDownload (game, preData) {
+  async processPreDownload(game, preData) {
     const { pre: preKey } = getRedisKeys(game)
-    const currentPre = game === 'ww' ? preData?.version : preData?.tag
+    const currentPre = game === "ww" ? preData?.version : preData?.tag
     const storedPre = await redis.get(preKey)
 
     if (currentPre) {
       if (currentPre !== storedPre) {
         await redis.set(preKey, currentPre)
         notice.pushNotify({
-          type: 'pre',
+          type: "pre",
           game,
           newVersion: currentPre,
           oldVersion: storedPre,
-          pushChangeType: cfg.getGameConfig(game).pushChangeType
+          pushChangeType: cfg.getGameConfig(game).pushChangeType,
         })
       }
     } else if (storedPre) {
       await redis.del(preKey)
       notice.pushNotify({
-        type: 'pre-remove',
+        type: "pre-remove",
         game,
         oldVersion: storedPre,
-        pushChangeType: cfg.getGameConfig(game).pushChangeType
+        pushChangeType: cfg.getGameConfig(game).pushChangeType,
       })
     }
   }
@@ -156,7 +152,7 @@ class ApiTools extends base {
    * @param {string} game - 游戏ID
    * @param {Object} gameConfig - 游戏配置
    */
-  sendToGroups (msg, game, gameConfig) {
+  sendToGroups(msg, game, gameConfig) {
     if (!gameConfig?.pushGroups?.length) {
       logger.debug(`[GamePush-Plugin][${getGameName(game)}] 未配置推送群组`)
       return
@@ -172,8 +168,8 @@ class ApiTools extends base {
    * @param {number} bytes - 字节数
    * @returns {string} 格式化后的大小
    */
-  formatSize (bytes) {
-    const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  formatSize(bytes) {
+    const units = ["B", "KB", "MB", "GB", "TB"]
     let size = Number(bytes)
     let unitIndex = 0
 

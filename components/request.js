@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import fetch from "node-fetch"
 
 class Request {
   /**
@@ -9,16 +9,14 @@ class Request {
    * @param {Object} [options.body] - 请求体数据
    * @returns {Object} 配置完成的请求选项对象
    */
-  createOptions (method, options = {}) {
+  createOptions(method, options = {}) {
     const { headers = {}, body } = options
-    const Headers = body
-      ? { 'Content-Type': 'application/json', ...headers }
-      : { ...headers }
+    const Headers = body ? { "Content-Type": "application/json", ...headers } : { ...headers }
 
     const requestOptions = {
       method,
       headers: Headers,
-      body: body ? JSON.stringify(body) : undefined
+      body: body ? JSON.stringify(body) : undefined,
     }
 
     return requestOptions
@@ -30,14 +28,12 @@ class Request {
    * @param {"json"|"text"|"raw"} [responseType="json"] - 期望的响应格式
    * @returns {Promise<any>} 处理后的响应数据
    */
-  async handleRequest (response, responseType) {
-    if (responseType === 'raw') return response
+  async handleRequest(response, responseType) {
+    if (responseType === "raw") return response
     try {
-      return responseType === 'json'
-        ? await response.json()
-        : await response.text()
+      return responseType === "json" ? await response.json() : await response.text()
     } catch (error) {
-      logger.error('[GamePush-Plugin] 响应解析失败:', error)
+      logger.error("[GamePush-Plugin] 响应解析失败:", error)
       return false
     }
   }
@@ -54,10 +50,10 @@ class Request {
    * @param {string} [options.gameName] - 游戏名称（用于日志前缀）
    * @returns {Promise<any|boolean>} 成功返回响应数据，失败返回false
    */
-  async request (method, url, options = {}) {
-    const { body, responseType = 'json', headers = {}, log = true, gameName } = options
+  async request(method, url, options = {}) {
+    const { body, responseType = "json", headers = {}, log = true, gameName } = options
     const requestOptions = this.createOptions(method, { body, headers })
-    const gamePrefix = gameName ? `[GamePush-Plugin][${gameName}]` : '[GamePush-Plugin]'
+    const gamePrefix = gameName ? `[GamePush-Plugin][${gameName}]` : "[GamePush-Plugin]"
     try {
       if (log) {
         logger.debug(`${gamePrefix} ${method}请求URL:`, url)
@@ -70,7 +66,7 @@ class Request {
 
       return await this.handleRequest(response, responseType)
     } catch (error) {
-      const gamePrefix = gameName ? `[GamePush-Plugin][${gameName}]` : '[GamePush-Plugin]'
+      const gamePrefix = gameName ? `[GamePush-Plugin][${gameName}]` : "[GamePush-Plugin]"
       if (log) logger.error(`${gamePrefix} ${method}请求失败:`, error.message)
       return false
     }
@@ -86,8 +82,8 @@ class Request {
    * @param {string} [options.gameName] - 游戏名称
    * @returns {Promise<any|boolean>} 响应数据或false
    */
-  async get (url, options = {}) {
-    return this.request('GET', url, options)
+  async get(url, options = {}) {
+    return this.request("GET", url, options)
   }
 
   /**
@@ -101,8 +97,8 @@ class Request {
    * @param {string} [options.gameName] - 游戏名称
    * @returns {Promise<any|boolean>} 响应数据或false
    */
-  async post (url, body, options = {}) {
-    return this.request('POST', url, { ...options, body })
+  async post(url, body, options = {}) {
+    return this.request("POST", url, { ...options, body })
   }
 }
 

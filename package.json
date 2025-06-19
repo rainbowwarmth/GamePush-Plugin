@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --fix",
+    "lint": "prettier --config .prettierrc.js --write --list-different ./*/*.js",
     "format": "eslint --fix \"src/**/*.js\""
   },
   "repository": {
@@ -17,11 +17,7 @@
   },
   "keywords": [],
   "devDependencies": {
-   "eslint": "^8.57.1",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-promise": "^6.6.0"
+    "prettier": "^3.5.3"
   },
   "imports": {
     "#GamePush.model": "./model/index.js",
