@@ -3,12 +3,7 @@ module.exports = {
     es2021: true,
     node: true
   },
-  extends: [
-    "standard",
-    "eslint:recommended",
-    "plugin:vue/recommended",
-    "plugin:prettier/recommended"
-  ],
+  extends: ["standard", "eslint:recommended", "plugin:prettier/recommended"],
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module"
