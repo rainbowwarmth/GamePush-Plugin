@@ -164,8 +164,8 @@ class Download {
 
     const clent = this.formatPackageInfo(
       data.game_pkgs,
-      `${gameName} ${typeText}客户端下载`,
-      "客户端",
+      `${gameName} ${typeText}${game === "bh3" ? "游戏下载" : "游戏分卷包下载"}`,
+      `${game === "bh3" ? "游戏下载" : "游戏分卷包下载"}`,
     )
 
     const audio = this.formatPackageInfo(
@@ -176,14 +176,14 @@ class Download {
 
     const patch_clent = this.formatPackageInfo(
       patch?.game_pkgs,
-      `${gameName} ${typeText}客户端补丁下载`,
-      "客户端补丁",
+      `${gameName} ${typeText}游戏增量包下载`,
+      "游戏增量包",
     )
 
     const patch_audio = this.formatPackageInfo(
       patch?.audio_pkgs,
-      `${gameName} ${typeText}音频补丁下载`,
-      "音频补丁",
+      `${gameName} ${typeText}音频增量包下载`,
+      "音频增量包",
     )
 
     return { msg, clent, audio, patch_clent, patch_audio }
