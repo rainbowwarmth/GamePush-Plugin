@@ -93,7 +93,13 @@ class Notifier extends base {
       const gameName = this.getGameName(game)
       let formattedTotalSize, incrementalSize
 
-      if (game === "ys") {
+      if (game === "ww") {
+        const downloadData = await download.getDownloadData(game, type)
+        let totalSize = downloadData.data.game_pkgs[0].size
+        formattedTotalSize = api.formatSize(totalSize)
+        let patchTotalSize = downloadData.patch.game_pkgs[0].size
+        incrementalSize = api.formatSize(patchTotalSize)
+      } else if (game === "ys") {
         let BranchesUrl = getGameChuckAPI(game)
         let BranchesData = await request.get(BranchesUrl, {
           responseType: "json",
@@ -128,9 +134,31 @@ class Notifier extends base {
         }
       } else {
         const downloadData = await download.getDownloadData(game, type)
-        let totalSize = downloadData.data.game_pkgs[0].size
+        let totalSize = 0
+        if (downloadData.data?.game_pkgs) {
+          downloadData.data.game_pkgs.forEach((pkg) => {
+            totalSize += parseInt(pkg.size || "0", 10)
+          })
+        }
+        if (downloadData.data?.audio_pkgs) {
+          const chineseAudio = downloadData.data.audio_pkgs.find(
+            (a) => a.language.toLowerCase() === "zh-cn"
+          )
+          if (chineseAudio) totalSize += parseInt(chineseAudio.size || "0", 10)
+        }
         formattedTotalSize = api.formatSize(totalSize)
-        let patchTotalSize = downloadData?.patch.game_pkgs[0]?.size
+        let patchTotalSize = 0
+        if (downloadData.patch?.game_pkgs) {
+          downloadData.patch.game_pkgs.forEach((pkg) => {
+            patchTotalSize += parseInt(pkg.size || "0", 10)
+          })
+        }
+        if (downloadData.patch?.audio_pkgs) {
+          const chineseAudio = downloadData.patch.audio_pkgs.find(
+            (a) => a.language.toLowerCase() === "zh-cn"
+          )
+          if (chineseAudio) patchTotalSize += parseInt(chineseAudio.size || "0", 10)
+        }
         incrementalSize = api.formatSize(patchTotalSize)
       }
 
