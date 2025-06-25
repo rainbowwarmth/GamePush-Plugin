@@ -1,6 +1,6 @@
-import cfg from "../../../lib/config/config.js"
+import { BotName, pluginPath } from "#GamePush.components"
 import _ from "lodash"
-import path from "node:path"
+import path from "path"
 
 /**
  * 基础类，提供共享功能
@@ -13,6 +13,7 @@ export default class base {
   constructor(e = {}) {
     this.e = e
     this.userId = Number(e?.user_id) || String(e?.user_id)
+    this.selfid = Number(e?.selfId) || String(e?.selfId) || Number(e?.self_id) || String(e?.self_id)
     this.model = "GamePush-Plugin"
     this._path = process.cwd().replace(/\\/g, "/")
   }
@@ -73,20 +74,12 @@ export default class base {
     const basic = {
       saveId: `push_${game}_${type}_${currentDate}`,
       cwd: this._path,
-      tplFile: path.join(
-        this._path,
-        "plugins/GamePush-Plugin/resources/html/GamePush-Plugin/GamePush-Plugin.html"
-      ),
-      fontsPath: path.join(this._path, "plugins/GamePush-Plugin/resources/fonts/"),
-      pluResPath: path.join(this._path, "plugins/GamePush-Plugin/resources/"),
-      htmlSavePath: path.join(this._path, "tmp/html/GamePush-Plugin"),
+      tplFile: `${pluginPath}/resources/html/GamePush-Plugin/GamePush-Plugin.html`,
+      fontsPath: `${pluginPath}/resources/fonts/`,
+      pluResPath: `${pluginPath}/resources/`,
+      htmlSavePath: path.join(this._path, `tmp/html/GamePush-Plugin`),
       htmlFileName: `${game}_${type}_${currentDate}.html`,
-      yunzaiName:
-        cfg.package.name === "miao-yunzai"
-          ? "Miao-Yunzai"
-          : cfg.package.name === "trss-yunzai"
-            ? "TRSS-Yunzai"
-            : _.capitalize(cfg.package.name)
+      yunzaiName: BotName
     }
 
     const icons = {

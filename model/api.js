@@ -1,4 +1,5 @@
 import { cfg, request } from "#GamePush.components"
+import { redis, sendGroupMsg } from "#GamePush.lib"
 import {
   base,
   notice,
@@ -157,9 +158,9 @@ class ApiTools extends base {
       logger.debug(`[GamePush-Plugin][${getGameName(game)}] 未配置推送群组`)
       return
     }
-
-    for (const groupId of gameConfig.pushGroups) {
-      Bot.pickGroup(groupId).sendMsg(msg)
+    for (const Id of gameConfig.pushGroups) {
+      const [bid, gid] = Id.split(":")
+      sendGroupMsg(bid, gid, msg)
     }
   }
 

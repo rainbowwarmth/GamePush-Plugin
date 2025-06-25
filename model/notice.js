@@ -1,6 +1,6 @@
+import { puppeteer } from "#GamePush.lib"
 import { cfg, request } from "#GamePush.components"
 import { api, base, download, getGameChuckAPI, getDownloadAPI } from "#GamePush.model"
-import puppeteer from "../../../lib/puppeteer/puppeteer.js"
 
 class Notifier extends base {
   templateMap = {
@@ -189,12 +189,13 @@ class Notifier extends base {
    */
   async sendImageMessage(type, game, gameConfig, templateData) {
     try {
-      const img = await puppeteer.screenshot("GamePush-Plugin", {
+      const data = {
         ...this.screenData(game, type),
         messages: this.templateMap[type](templateData),
         date: new Date().toLocaleDateString(),
         type
-      })
+      }
+      const img = await puppeteer.screenshot("GamePush-Plugin", data)
       api.sendToGroups(img, game, gameConfig)
     } catch (err) {
       logger.error(`[GamePush-Plugin] 发送图片消息失败: ${err.message}`, err)

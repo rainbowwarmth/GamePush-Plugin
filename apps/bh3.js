@@ -1,8 +1,8 @@
 import { cfg } from "#GamePush.components"
+import { plugin, redis, makeForwardMsg } from "#GamePush.lib"
 import { api, download, getRedisKeys } from "#GamePush.model"
 
-const bh3Reg = "(崩坏三|崩坏3|崩三|崩3|bbb|三崩子)"
-
+const bh3Reg = "(!|崩坏三|崩坏3|崩三|崩3|bbb|三崩子)"
 export class bh3Push extends plugin {
   constructor() {
     super({
@@ -23,7 +23,8 @@ export class bh3Push extends plugin {
         },
         {
           reg: `^#*${bh3Reg}当前版本$`,
-          fnc: "bh3Ver"
+          fnc: "bh3Ver",
+          permission: "all"
         },
         {
           reg: `^#*${bh3Reg}获取下载链接$`,
@@ -37,8 +38,8 @@ export class bh3Push extends plugin {
     })
 
     this.task = {
-      cron: cfg.getGameConfig("bh3").cron || "0 0/5 * * * *",
       name: "[GamePush-Plugin] 崩坏3版本监控",
+      cron: cfg.getGameConfig("bh3").cron || "0 0/5 * * * *",
       fnc: () => api.autoCheck("bh3"),
       log: false
     }
@@ -63,23 +64,36 @@ export class bh3Push extends plugin {
     }
 
     const isEnable = e.msg.includes("开启")
+    const botid = e.self_id || e.selfId
+    const groupIdentifier = `${botid}:${groupId}`
 
     cfg.updateGameConfig("bh3", (config) => {
       config.pushGroups = config.pushGroups || []
+
+      const existingIndex = config.pushGroups.findIndex((id) => id === groupIdentifier)
+
       if (isEnable) {
-        if (!config.pushGroups.includes(groupId)) {
-          config.pushGroups.push(groupId)
+        if (existingIndex === -1) {
+          config.pushGroups.push(groupIdentifier)
         }
       } else {
-        config.pushGroups = config.pushGroups.filter((id) => id !== groupId)
+        if (existingIndex !== -1) {
+          config.pushGroups.splice(existingIndex, 1)
+        }
       }
+
       config.enable = isEnable
       config.cron = config.cron || "0 0/5 * * * *"
       config.pushChangeType = config.pushChangeType || "1"
     })
 
-    const action = isEnable ? `已添加本群到推送列表（ID：${groupId}）` : "已移除本群推送"
-    return this.reply(`✅ 已${isEnable ? "开启" : "关闭"}崩坏3版本推送，${action}`, true)
+    const action = isEnable
+      ? `已添加本群到推送列表（新格式标识：${groupIdentifier}）`
+      : "已移除本群推送"
+    return this.reply(
+      `✅ 已${isEnable ? "开启" : "关闭"}崩坏3版本推送，${action}\n📢 注意：由于推送格式更新，您需要在其他群重新添加推送设置`,
+      true
+    )
   }
 
   /**
@@ -95,19 +109,19 @@ export class bh3Push extends plugin {
       `预下载版本：${preVer || "未开启"}`
     ].join("\n")
 
-    return this.reply(msg, true)
+    this.reply(msg)
   }
 
   /**
    * 获取崩坏3下载链接
    */
-  async bh3DownloadLinks() {
+  async bh3DownloadLinks(e) {
     try {
       const { data, patch } = await download.getDownloadData("bh3", "main")
       if (!data) return this.reply("当前没有可用的正式版本下载", true)
 
       const { msg, clent } = download.formatDownloadInfo("bh3", data, "main", patch)
-      return this.reply(await Bot.makeForwardArray([msg, clent]))
+      return this.reply(await makeForwardMsg(e, [msg, clent]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
     }
@@ -116,13 +130,13 @@ export class bh3Push extends plugin {
   /**
    * 获取崩坏3预下载链接
    */
-  async bh3PreDownloadLinks() {
+  async bh3PreDownloadLinks(e) {
     try {
       const { data, patch } = await download.getDownloadData("bh3", "pre")
       if (!data) return this.reply("🚫 崩坏3当前未开放预下载", true)
 
       const { msg, clent } = download.formatDownloadInfo("bh3", data, "pre", patch)
-      return this.reply(await Bot.makeForwardArray([msg, clent]))
+      return this.reply(await makeForwardMsg(e, [msg, clent]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)
     }

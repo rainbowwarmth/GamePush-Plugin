@@ -1,6 +1,6 @@
 import { cfg } from "#GamePush.components"
+import { plugin, redis } from "#GamePush.lib"
 import { api, getRedisKeys } from "#GamePush.model"
-
 const ysReg = "(ys|YS|原神)"
 
 export class ysPush extends plugin {

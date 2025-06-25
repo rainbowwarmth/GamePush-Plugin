@@ -16,6 +16,12 @@
     "url": "https://gitcode.com/rainbowwarmth/GamePush-Plugin.git"
   },
   "keywords": [],
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "chokidar": "^4.0.3",
+    "node-fetch": "^3.3.2",
+    "yaml": "^2.8.0"
+  },
   "devDependencies": {
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.5",
@@ -26,7 +32,21 @@
     "eslint-plugin-promise": "^6.6.0",
     "prettier": "^3.5.3"
   },
+  "karin": {
+    "apps": [
+      "apps"
+    ],
+    "static": [
+      "resources"
+    ],
+    "files": [
+      "config",
+      "data",
+      "resources"
+    ]
+  },
   "imports": {
+    "#GamePush.lib": "./lib/index.js",
     "#GamePush.model": "./model/index.js",
     "#GamePush.components": "./components/index.js"
   }

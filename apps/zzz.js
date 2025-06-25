@@ -1,4 +1,5 @@
 import { cfg } from "#GamePush.components"
+import { plugin, redis, makeForwardMsg } from "#GamePush.lib"
 import { api, download, getRedisKeys } from "#GamePush.model"
 
 const zzzReg = "(绝区零|zzz|ZZZ)"
@@ -101,10 +102,9 @@ export class zzzPush extends plugin {
   /**
    * 获取绝区零下载链接
    */
-  async zzzDownloadLinks() {
+  async zzzDownloadLinks(e) {
     try {
       const { data, patch } = await download.getDownloadData("zzz", "main")
-      console.log(data)
       if (!data) return this.reply("当前没有可用的正式版本下载", true)
 
       const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo(
@@ -113,7 +113,7 @@ export class zzzPush extends plugin {
         "main",
         patch
       )
-      return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
+      return this.reply(await makeForwardMsg(e, [msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
     }
@@ -122,7 +122,7 @@ export class zzzPush extends plugin {
   /**
    * 获取绝区零预下载链接
    */
-  async zzzPreDownloadLinks() {
+  async zzzPreDownloadLinks(e) {
     try {
       const { data, patch } = await download.getDownloadData("zzz", "pre")
       if (!data) return this.reply("🚫 绝区零当前未开放预下载", true)
@@ -133,7 +133,7 @@ export class zzzPush extends plugin {
         "pre",
         patch
       )
-      return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
+      return this.reply(await makeForwardMsg(e, [msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)
     }

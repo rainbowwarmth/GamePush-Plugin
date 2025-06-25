@@ -1,4 +1,5 @@
 import { cfg } from "#GamePush.components"
+import { plugin, redis, makeForwardMsg } from "#GamePush.lib"
 import { api, download, getRedisKeys } from "#GamePush.model"
 
 const srReg = "(sr|SR|星铁|星穹铁道|铁道|崩坏星穹铁道)"
@@ -104,7 +105,7 @@ export class srPush extends plugin {
   /**
    * 获取星铁下载链接
    */
-  async srDownloadLinks() {
+  async srDownloadLinks(e) {
     try {
       const { data, patch } = await download.getDownloadData("sr", "main")
       if (!data) return this.reply("当前没有可用的正式版本下载", true)
@@ -115,7 +116,7 @@ export class srPush extends plugin {
         "main",
         patch
       )
-      return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
+      return this.reply(await makeForwardMsg(e, [msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       logger.error("[GamePush-Plugin] 获取星铁下载链接失败", err)
       return this.reply(`❌ 获取下载链接失败: ${err.message}`, true)
@@ -125,7 +126,7 @@ export class srPush extends plugin {
   /**
    * 获取星铁预下载链接
    */
-  async srPreDownloadLinks() {
+  async srPreDownloadLinks(e) {
     try {
       const { data, patch } = await download.getDownloadData("sr", "pre")
       if (!data) return this.reply("当前没有可用的预下载版本", true)
@@ -136,7 +137,7 @@ export class srPush extends plugin {
         "pre",
         patch
       )
-      return this.reply(await Bot.makeForwardArray([msg, clent, audio, patch_clent, patch_audio]))
+      return this.reply(await makeForwardMsg(e, [msg, clent, audio, patch_clent, patch_audio]))
     } catch (err) {
       logger.error("[GamePush-Plugin] 获取星铁预下载链接失败", err)
       return this.reply(`❌ 获取预下载链接失败: ${err.message}`, true)

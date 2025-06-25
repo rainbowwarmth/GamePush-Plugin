@@ -10,6 +10,8 @@
 
 ## 安装方法
 
+### 使用Yunzai
+
 使用GitHub
 
 ```shell
@@ -26,6 +28,26 @@ git clone https://gitee.com/rainbowwarmth/GamePush-Plugin ./plugins/GamePush-Plu
 
 ```shell
 git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin ./plugins/GamePush-Plugin
+```
+
+### 使用Karin
+
+使用GitHub
+
+```shell
+git clone https://github.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-GamePush
+```
+
+使用Gitee
+
+```shell
+git clone https://gitee.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-GamePush
+```
+
+使用Gitcode
+
+```shell
+git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-GamePush
 ```
 
 ## 使用方法

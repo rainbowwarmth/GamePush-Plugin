@@ -13,7 +13,18 @@ const GAME_IDS = ["ys", "sr", "zzz", "bh3", "ww"]
  * @returns {Array<string>} 规范化后的群组ID列表
  */
 function normalizeGroups(groups) {
-  return Array.isArray(groups) ? groups.map(String).filter(Boolean) : []
+  return Array.isArray(groups)
+    ? groups
+        .map((item) => {
+          if (/^\d+$/.test(item)) {
+            const botid = process.env.BOT_ID || "10001"
+            return `${botid}:${item}`
+          }
+          return item
+        })
+        .map(String)
+        .filter(Boolean)
+    : []
 }
 
 class Config {

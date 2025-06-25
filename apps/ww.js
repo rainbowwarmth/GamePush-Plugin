@@ -1,4 +1,5 @@
 import { cfg } from "#GamePush.components"
+import { plugin, redis, makeForwardMsg } from "#GamePush.lib"
 import { api, download, getRedisKeys } from "#GamePush.model"
 
 const wwReg = "(~|鸣潮|ww|WW|mc)"
@@ -101,14 +102,13 @@ export class wwPush extends plugin {
   /**
    * 获取鸣潮下载链接
    */
-  async wwDownloadLinks() {
+  async wwDownloadLinks(e) {
     try {
       const { data, patch } = await download.getDownloadData("ww", "main")
-      console.log(data)
       if (!data) return this.reply("当前没有可用的正式版本下载", true)
 
       const { msg, clent, patch_clent } = download.formatDownloadInfo("ww", data, "main", patch)
-      return this.reply(await Bot.makeForwardArray([msg, clent, patch_clent]))
+      return this.reply(await makeForwardMsg(e, [msg, clent, patch_clent]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
     }
@@ -117,13 +117,13 @@ export class wwPush extends plugin {
   /**
    * 获取鸣潮预下载链接
    */
-  async wwPreDownloadLinks() {
+  async wwPreDownloadLinks(e) {
     try {
       const { data, patch } = await download.getDownloadData("ww", "pre")
       if (!data) return this.reply("🚫 鸣潮当前未开放预下载", true)
 
       const { msg, clent, patch_clent } = download.formatDownloadInfo("ww", data, "pre", patch)
-      return this.reply(await Bot.makeForwardArray([msg, clent, patch_clent]))
+      return this.reply(await makeForwardMsg(e, [msg, clent, patch_clent]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)
     }
