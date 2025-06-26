@@ -7,26 +7,6 @@ const CONFIG_PATH = path.join(CONFIG_DIR, "GamePush-Plugin.yaml")
 const DEFAULT_CRON = "0 0/5 * * * *"
 const GAME_IDS = ["ys", "sr", "zzz", "bh3", "ww"]
 
-/**
- * 规范化群组ID列表
- * @param {Array|any} groups - 群组ID列表
- * @returns {Array<string>} 规范化后的群组ID列表
- */
-function normalizeGroups(groups) {
-  return Array.isArray(groups)
-    ? groups
-        .map((item) => {
-          if (/^\d+$/.test(item)) {
-            const botid = process.env.BOT_ID || "10001"
-            return `${botid}:${item}`
-          }
-          return item
-        })
-        .map(String)
-        .filter(Boolean)
-    : []
-}
-
 class Config {
   configCache = {}
   watcher = null
@@ -72,18 +52,27 @@ class Config {
   loadConfig() {
     try {
       const raw = fs.existsSync(CONFIG_PATH) ? YAML.parse(fs.readFileSync(CONFIG_PATH, "utf8")) : {}
+      this.configCache = this.getDefaultConfig()
+      for (const gameId of GAME_IDS) {
+        if (raw[gameId]) {
+          const convertedPushGroups = Array.isArray(raw[gameId].pushGroups)
+            ? raw[gameId].pushGroups.map((item) => {
+                if (typeof item === "string") {
+                  const [botId, groupId] = item.split(":")
+                  return { botId, groupId }
+                }
+                return item
+              })
+            : []
 
-      this.configCache = Object.keys(raw).reduce((validated, gameId) => {
-        if (GAME_IDS.includes(gameId)) {
-          validated[gameId] = {
+          this.configCache[gameId] = {
             enable: !!raw[gameId].enable,
             cron: raw[gameId].cron || DEFAULT_CRON,
-            pushGroups: normalizeGroups(raw[gameId].pushGroups),
+            pushGroups: convertedPushGroups,
             pushChangeType: raw[gameId].pushChangeType || "1"
           }
         }
-        return validated
-      }, this.getDefaultConfig())
+      }
     } catch (err) {
       logger.error("[GamePush-Plugin] 配置加载失败", err)
       this.configCache = this.getDefaultConfig()
@@ -96,7 +85,21 @@ class Config {
    */
   saveConfig(newConfig) {
     try {
-      fs.writeFileSync(CONFIG_PATH, YAML.stringify(newConfig, { indent: 2 }), "utf8")
+      const convertedConfig = {}
+      for (const gameId in newConfig) {
+        convertedConfig[gameId] = {
+          enable: newConfig[gameId].enable,
+          cron: newConfig[gameId].cron,
+          pushGroups: newConfig[gameId].pushGroups.map((item) => `${item.botId}:${item.groupId}`),
+          pushChangeType: newConfig[gameId].pushChangeType
+        }
+      }
+      const customStringify = (config) => {
+        let yamlStr = YAML.stringify(config, { indent: 2 })
+        yamlStr = yamlStr.replace(/: '(\d+)'$/gm, ": $1")
+        return yamlStr
+      }
+      fs.writeFileSync(CONFIG_PATH, customStringify(convertedConfig), "utf8")
       this.configCache = newConfig
     } catch (err) {
       logger.error("[GamePush-Plugin] 配置保存失败", err)
@@ -152,21 +155,19 @@ class Config {
   /**
    * 从前端保存配置
    * @param {Object} data - 前端配置数据
-   * @param {Object} options - 选项
    * @returns {Object} 保存结果
    */
-  saveFromFrontend(data, { Result }) {
+  saveFromFrontend(data) {
     try {
-      const saveData = GAME_IDS.reduce((result, gameId) => {
-        const enable = data[`${gameId}.enable`] ?? this.configCache[gameId].enable
-        result[gameId] = {
-          enable,
+      const saveData = {}
+      for (const gameId of GAME_IDS) {
+        saveData[gameId] = {
+          enable: data[`${gameId}.enable`] ?? this.configCache[gameId].enable,
           cron: data[`${gameId}.cron`] || DEFAULT_CRON,
-          pushGroups: normalizeGroups(data[`${gameId}.pushGroups`]),
+          pushGroups: data[`${gameId}.pushGroups`] || [],
           pushChangeType: data[`${gameId}.pushChangeType`] || "1"
         }
-        return result
-      }, {})
+      }
       this.saveConfig(saveData)
       return { success: true, message: "游戏推送配置已保存！" }
     } catch (err) {

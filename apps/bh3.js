@@ -70,16 +70,8 @@ export class bh3Push extends plugin {
     cfg.updateGameConfig("bh3", (config) => {
       config.pushGroups = config.pushGroups || []
 
-      const existingIndex = config.pushGroups.findIndex((id) => id === groupIdentifier)
-
       if (isEnable) {
-        if (existingIndex === -1) {
-          config.pushGroups.push(groupIdentifier)
-        }
-      } else {
-        if (existingIndex !== -1) {
-          config.pushGroups.splice(existingIndex, 1)
-        }
+        config.pushGroups.push(groupIdentifier)
       }
 
       config.enable = isEnable
@@ -87,13 +79,8 @@ export class bh3Push extends plugin {
       config.pushChangeType = config.pushChangeType || "1"
     })
 
-    const action = isEnable
-      ? `已添加本群到推送列表（新格式标识：${groupIdentifier}）`
-      : "已移除本群推送"
-    return this.reply(
-      `✅ 已${isEnable ? "开启" : "关闭"}崩坏3版本推送，${action}\n📢 注意：由于推送格式更新，您需要在其他群重新添加推送设置`,
-      true
-    )
+    const action = isEnable ? `已添加本群到推送列表（ID：${groupIdentifier}）` : "已移除本群推送"
+    return this.reply(`✅ 已${isEnable ? "开启" : "关闭"}崩坏3版本推送，${action}`, true)
   }
 
   /**

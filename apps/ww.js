@@ -64,16 +64,15 @@ export class wwPush extends plugin {
     }
 
     const isEnable = e.msg.includes("开启")
+    const botid = e.self_id || e.selfId
+    const groupIdentifier = `${botid}:${groupId}`
 
     cfg.updateGameConfig("ww", (config) => {
       config.pushGroups = config.pushGroups || []
       if (isEnable) {
-        if (!config.pushGroups.includes(groupId)) {
-          config.pushGroups.push(groupId)
-        }
-      } else {
-        config.pushGroups = config.pushGroups.filter((id) => id !== groupId)
+        config.pushGroups.push(groupIdentifier)
       }
+
       config.enable = isEnable
       config.cron = config.cron || "0 0/5 * * * *"
       config.pushChangeType = config.pushChangeType || "1"

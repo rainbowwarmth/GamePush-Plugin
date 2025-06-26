@@ -50,22 +50,19 @@ export class ysPush extends plugin {
   async ysPushSet() {
     const e = this.e
     const groupId = String(e.group_id)
-
     if (!e.isGroup) {
       return this.reply("❌ 该功能仅限群聊中使用", true)
     }
 
     const isEnable = e.msg.includes("开启")
+    const botid = e.self_id || e.selfId
+    const groupIdentifier = `${botid}:${groupId}`
 
     cfg.updateGameConfig("ys", (config) => {
       config.pushGroups = config.pushGroups || []
 
       if (isEnable) {
-        if (!config.pushGroups.includes(groupId)) {
-          config.pushGroups.push(groupId)
-        }
-      } else {
-        config.pushGroups = config.pushGroups.filter((id) => id !== groupId)
+        config.pushGroups.push(groupIdentifier)
       }
 
       config.enable = isEnable

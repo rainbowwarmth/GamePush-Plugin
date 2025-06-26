@@ -6,9 +6,7 @@ let apps = {}
 
 if (BotName !== "karin") {
   const files = fs.readdirSync(`./plugins/${pluginName}/apps`).filter((file) => {
-    // 排除 task.js 文件
     const isTaskFile = file.toLowerCase() === "task.js"
-    // 只保留 JavaScript 文件且排除 task.js
     return file.endsWith(".js") && !isTaskFile
   })
   let ret = []

@@ -53,11 +53,31 @@ export function supportGuoba() {
               },
               {
                 field: `${gameId}.pushGroups`,
-                label: "推送群组",
-                bottomHelpMessage: "选择需要推送通知的群组",
-                component: "GSelectGroup",
+                label: "推送配置",
+                bottomHelpMessage: "机器人ID和群组配置",
+                component: "GSubForm",
                 componentProps: {
-                  placeholder: "点击选择群"
+                  multiple: true,
+                  schemas: [
+                    {
+                      field: "botId",
+                      label: "机器人ID",
+                      component: "Input",
+                      required: true,
+                      componentProps: {
+                        placeholder: "请输入机器人账号ID"
+                      }
+                    },
+                    {
+                      field: "groupId",
+                      label: "群号",
+                      component: "Input",
+                      required: true,
+                      componentProps: {
+                        placeholder: "请输入群号"
+                      }
+                    }
+                  ]
                 }
               },
               {
