@@ -1,6 +1,5 @@
 import { BotName, pluginName, PluginPackage, pluginPath } from "#GamePush.components"
 import _ from "lodash"
-import karin from "node-karin"
 import path from "path"
 
 /**
