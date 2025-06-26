@@ -52,23 +52,31 @@ class Config {
   loadConfig() {
     try {
       const raw = fs.existsSync(CONFIG_PATH) ? YAML.parse(fs.readFileSync(CONFIG_PATH, "utf8")) : {}
+
       this.configCache = this.getDefaultConfig()
+
       for (const gameId of GAME_IDS) {
         if (raw[gameId]) {
-          const convertedPushGroups = Array.isArray(raw[gameId].pushGroups)
-            ? raw[gameId].pushGroups.map((item) => {
-                if (typeof item === "string") {
-                  const [botId, groupId] = item.split(":")
-                  return { botId, groupId }
+          // 将字符串数组转换为对象数组供前端使用
+          const pushGroups = []
+          if (Array.isArray(raw[gameId].pushGroups)) {
+            for (const item of raw[gameId].pushGroups) {
+              if (typeof item === "string") {
+                const [botId, groupId] = item.split(":")
+                if (botId && groupId) {
+                  pushGroups.push({ botId, groupId })
                 }
-                return item
-              })
-            : []
+              } else {
+                // 保持兼容对象格式
+                pushGroups.push(item)
+              }
+            }
+          }
 
           this.configCache[gameId] = {
             enable: !!raw[gameId].enable,
             cron: raw[gameId].cron || DEFAULT_CRON,
-            pushGroups: convertedPushGroups,
+            pushGroups,
             pushChangeType: raw[gameId].pushChangeType || "1"
           }
         }
@@ -85,21 +93,25 @@ class Config {
    */
   saveConfig(newConfig) {
     try {
-      const convertedConfig = {}
-      for (const gameId in newConfig) {
-        convertedConfig[gameId] = {
+      // 创建副本，因为我们不想修改原始配置
+      const saveData = {}
+
+      for (const gameId of Object.keys(newConfig)) {
+        // 将对象数组转换为字符串格式
+        saveData[gameId] = {
           enable: newConfig[gameId].enable,
           cron: newConfig[gameId].cron,
-          pushGroups: newConfig[gameId].pushGroups.map((item) => `${item.botId}:${item.groupId}`),
+          pushGroups: newConfig[gameId].pushGroups.map((item) => {
+            if (typeof item === "string") {
+              return item
+            }
+            return `${item.botId}:${item.groupId}`
+          }),
           pushChangeType: newConfig[gameId].pushChangeType
         }
       }
-      const customStringify = (config) => {
-        let yamlStr = YAML.stringify(config, { indent: 2 })
-        yamlStr = yamlStr.replace(/: '(\d+)'$/gm, ": $1")
-        return yamlStr
-      }
-      fs.writeFileSync(CONFIG_PATH, customStringify(convertedConfig), "utf8")
+
+      fs.writeFileSync(CONFIG_PATH, YAML.stringify(saveData, { indent: 2 }), "utf8")
       this.configCache = newConfig
     } catch (err) {
       logger.error("[GamePush-Plugin] 配置保存失败", err)
@@ -149,6 +161,7 @@ class Config {
    * @returns {Object} 前端配置
    */
   getFrontendConfig() {
+    // 返回转换为对象格式的配置
     return this.configCache
   }
 
@@ -160,6 +173,7 @@ class Config {
   saveFromFrontend(data) {
     try {
       const saveData = {}
+
       for (const gameId of GAME_IDS) {
         saveData[gameId] = {
           enable: data[`${gameId}.enable`] ?? this.configCache[gameId].enable,
@@ -168,6 +182,7 @@ class Config {
           pushChangeType: data[`${gameId}.pushChangeType`] || "1"
         }
       }
+
       this.saveConfig(saveData)
       return { success: true, message: "游戏推送配置已保存！" }
     } catch (err) {

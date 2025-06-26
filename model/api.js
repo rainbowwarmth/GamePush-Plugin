@@ -158,9 +158,13 @@ class ApiTools extends base {
       logger.debug(`[GamePush-Plugin][${getGameName(game)}] 未配置推送群组`)
       return
     }
-    for (const Id of gameConfig.pushGroups) {
-      const [bid, gid] = Id.split(":")
-      sendGroupMsg(bid, gid, msg)
+    for (const pushItem of gameConfig.pushGroups) {
+      let botId, groupId
+      if (typeof pushItem === "object") {
+        botId = pushItem.botId
+        groupId = pushItem.groupId
+      }
+      sendGroupMsg(botId, groupId, msg)
     }
   }
 
