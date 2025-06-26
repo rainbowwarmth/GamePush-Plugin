@@ -2,7 +2,7 @@ import { cfg } from "#GamePush.components"
 import { plugin, redis, makeForwardMsg } from "#GamePush.lib"
 import { api, download, getRedisKeys } from "#GamePush.model"
 
-const bh3Reg = "(!|崩坏三|崩坏3|崩三|崩3|bbb|三崩子)"
+const bh3Reg = "(!|！|崩坏三|崩坏3|崩三|崩3|bbb|三崩子)"
 export class bh3Push extends plugin {
   constructor() {
     super({

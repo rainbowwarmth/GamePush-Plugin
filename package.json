@@ -40,9 +40,7 @@
       "resources"
     ],
     "files": [
-      "config",
-      "data",
-      "resources"
+      "config"
     ]
   },
   "imports": {

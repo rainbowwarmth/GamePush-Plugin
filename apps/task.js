@@ -18,7 +18,6 @@ const tasks = gameIds.map((gameId) => {
   logger.info(`创建任务: ${name} (cron: ${cron})`)
 
   return karin.task(name, cron, async () => {
-    logger.info(`[${new Date().toISOString()}] 开始检查 ${nameMap[gameId]} 更新`)
     try {
       api.autoCheck(gameId)
     } catch (e) {

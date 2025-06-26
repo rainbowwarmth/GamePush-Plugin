@@ -1,5 +1,6 @@
-import { BotName, pluginPath } from "#GamePush.components"
+import { BotName, pluginName, PluginPackage, pluginPath } from "#GamePush.components"
 import _ from "lodash"
+import karin from "node-karin"
 import path from "path"
 
 /**
@@ -71,15 +72,36 @@ export default class base {
    */
   getScreenData(game, type = "") {
     const currentDate = this.getCurrentDate()
-    const basic = {
+    let basic
+    if (BotName === "Karin") {
+      basic = {
+        tplFile: `${pluginPath}/resources/html/GamePush-Plugin/GamePush-Plugin.html`,
+        fontsPath: `${pluginPath}/resources/fonts/`,
+        pluResPath: `${pluginPath}/resources/`,
+        htmlSavePath: `${this._path}/@karinjs/${pluginName}/html/`
+      }
+    } else {
+      basic = {
+        tplFile: path.join(
+          this._path,
+          "plugins/GamePush-Plugin/resources/html/GamePush-Plugin/GamePush-Plugin.html"
+        ),
+        fontsPath: path.join(this._path, "plugins/GamePush-Plugin/resources/fonts/"),
+        pluResPath: path.join(this._path, "plugins/GamePush-Plugin/resources/"),
+        htmlSavePath: path.join(this._path, "tmp/html/GamePush-Plugin")
+      }
+    }
+    const other = {
       saveId: `push_${game}_${type}_${currentDate}`,
       cwd: this._path,
-      tplFile: `${pluginPath}/resources/html/GamePush-Plugin/GamePush-Plugin.html`,
-      fontsPath: `${pluginPath}/resources/fonts/`,
-      pluResPath: `${pluginPath}/resources/`,
-      htmlSavePath: path.join(this._path, `tmp/html/GamePush-Plugin`),
       htmlFileName: `${game}_${type}_${currentDate}.html`,
-      yunzaiName: BotName
+      bot: {
+        name: BotName
+      },
+      plugin: {
+        name: pluginName,
+        version: PluginPackage.version
+      }
     }
 
     const icons = {
@@ -91,6 +113,7 @@ export default class base {
     }
 
     return {
+      ...other,
       ...basic,
       gameName: this.getGameName(game),
       icon: icons[game]

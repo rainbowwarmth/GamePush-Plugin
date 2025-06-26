@@ -15,7 +15,7 @@ const BotPackage = JSON.parse(fs.readFileSync(path.join(_path, "package.json"), 
 const pluginName = path.basename(path.join(import.meta.url, "../../"))
 
 const BotName = (() => {
-  if (pluginName === "karin-plugin-GamePush") {
+  if (pluginName.includes("karin")) {
     return "Karin"
   } else if (BotPackage.name == "miao-yunzai") {
     return "Miao-Yunzai"
@@ -30,4 +30,6 @@ const pluginRoot = path.join(_path, "plugins", pluginName)
 
 const pluginResources = path.join(pluginRoot, "resources")
 
-export { pluginName, pluginPath, pluginRoot, BotName, pluginResources, BotPackage }
+const PluginPackage = JSON.parse(fs.readFileSync(path.join(pluginRoot, "package.json"), "utf8"))
+
+export { pluginName, pluginPath, PluginPackage, pluginRoot, BotName, pluginResources, BotPackage }

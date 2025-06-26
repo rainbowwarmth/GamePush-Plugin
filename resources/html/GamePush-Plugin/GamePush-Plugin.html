@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="zh-CN">
   <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <link rel="shortcut icon" href="#" />
@@ -8,21 +8,79 @@
       type="text/css"
       href="{{pluResPath}}html/GamePush-Plugin/GamePush-Plugin.css"
     />
+    <title>{{gameName}}更新通知</title>
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <img class="game-icon" src="{{icon}}" />
-        <h1 class="title">{{gameName}}更新通知</h1>
+      <div class="header-bg"></div>
+      <div class="header-content">
+        <div class="header">
+          <img class="game-icon" src="{{icon}}" alt="{{gameName}} icon" />
+          <div class="title-container">
+            <h1 class="title">{{gameName}}更新通知</h1>
+            <div class="subtitle">
+              {{ type === 'pre' ? '预下载资源已开放' : type === 'main'? '新版本已发布' :
+              '预下载资源已关闭' }}
+            </div>
+            <div class="update-time">
+              {{ type === 'pre' ? '开放时间: ' : type === 'main' ? '更新时间：': '关闭时间：'
+              }}{{date}}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="message-list">
-        {{ each messages }}
-        <div class="message-item"><%- $value %></div>
-        {{ /each }}
+      <div class="main-content">
+        <div class="three-column-cards">
+          <div class="info-card version-card">
+            <div class="card-title">
+              <span class="emoji-text">🛠️</span> {{ type === 'pre' ? '新版本' : type === 'main' ?
+              '版本变更' : '正式版'}}
+            </div>
+            <div class="version-display">
+              {{ if type === 'pre'}}
+              <span class="new-version">{{newVersion}}</span>
+              {{else if type === 'main'}}
+              <span class="old-version">{{oldVersion}}</span>
+              <span class="version-arrow">→</span>
+              <span class="new-version">{{newVersion}}</span>
+              {{else}}
+              <span class="current-version">{{oldVersion}}</span>
+              {{/if}}
+            </div>
+          </div>
+
+          {{ if type !== 'pre' || gameName !== '原神' }}
+          <div class="info-card fullsize-card">
+            <div class="card-title"><span class="emoji-text">📦</span> 完整大小</div>
+            <div class="size-value">{{formattedTotalSize}}</div>
+            <div class="size-label">含中文语音资源包</div>
+          </div>
+          {{ /if }} {{ if !((type === 'main' && (gameName === '原神' || gameName === '崩坏3')) ||
+          (type === 'pre' && gameName === '崩坏3') || type === 'pre-remove') }}
+          <div class="info-card incr-card">
+            <div class="card-title"><span class="emoji-text">⚡</span> 增量更新</div>
+            <div class="size-value incr-size">{{incrementalSize}}</div>
+            <div class="size-label">含中文语音资源包</div>
+          </div>
+          {{ /if }}
+        </div>
+
+        <div class="update-prompt">
+          {{ type === 'pre' ? '请提前下载游戏资源' : '请及时更新客户端以获取完整游戏体验' }}
+        </div>
       </div>
 
-      <div class="footer">Created by {{yunzaiName}} & GamePush-Plugin • {{date}}</div>
+      <div class="footer">
+        <div class="creator-info">
+          Created by {{bot.name}} &
+          <span class="plugin-name">
+            {{plugin.name}}
+            <span class="plugin-version">v{{plugin.version}}</span>
+          </span>
+        </div>
+        <div class="date-info">{{date}}</div>
+      </div>
     </div>
   </body>
 </html>

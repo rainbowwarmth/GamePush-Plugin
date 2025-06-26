@@ -2,7 +2,7 @@ import { cfg } from "#GamePush.components"
 import { plugin, redis, makeForwardMsg } from "#GamePush.lib"
 import { api, download, getRedisKeys } from "#GamePush.model"
 
-const zzzReg = "(绝区零|zzz|ZZZ)"
+const zzzReg = "(%|绝区零|zzz|ZZZ)"
 
 export class zzzPush extends plugin {
   constructor() {

@@ -3,52 +3,7 @@ import { cfg, request } from "#GamePush.components"
 import { api, base, download, getGameChuckAPI, getDownloadAPI } from "#GamePush.model"
 
 class Notifier extends base {
-  templateMap = {
-    main: ({ gameName, oldVersion, newVersion, formattedTotalSize, incrementalSize }) => [
-      `<span class="emoji-text">✨</span> ${gameName}游戏版本更新通知`,
-      `<span class="emoji-text">🚀</span> 版本变更：${oldVersion} → ${newVersion}`,
-      formattedTotalSize &&
-        `<span class="emoji-text">📦</span> 完整大小（含中文语音）：${formattedTotalSize}`,
-      ...(gameName !== "原神" && gameName !== "崩坏3"
-        ? [
-            incrementalSize &&
-              `<span class="emoji-text">🔄</span> 增量更新大小：约${incrementalSize}`
-          ]
-        : []),
-      '<span class="emoji-text">📢</span> 请及时更新客户端',
-      ...(gameName !== "原神"
-        ? [`<span class="emoji-text">💾</span> 发送【#${gameName}获取下载链接】获取客户端`]
-        : [])
-    ],
-
-    pre: ({ gameName, newVersion, formattedTotalSize, incrementalSize }) => [
-      `<span class="emoji-text">🎁</span> ${gameName}预下载资源已开放`,
-      `<span class="emoji-text">📦</span> 新版本：${newVersion}`,
-      ...(gameName !== "原神"
-        ? [
-            formattedTotalSize &&
-              `<span class="emoji-text">📦</span> 完整大小（含中文语音）：${formattedTotalSize}`
-          ]
-        : []),
-      ...(gameName !== "崩坏3"
-        ? [
-            incrementalSize &&
-              `<span class="emoji-text">🔄</span> 增量更新大小：约${incrementalSize}`
-          ]
-        : []),
-      '<span class="emoji-text">📥</span> 请提前下载游戏资源',
-      ...(gameName !== "原神"
-        ? [`<span class="emoji-text">🚪</span> 发送【#${gameName}获取预下载链接】获取链接`]
-        : [])
-    ],
-
-    "pre-remove": ({ gameName, oldVersion }) => [
-      `<span class="emoji-text">🌙</span> ${gameName}预下载资源已关闭`,
-      `<span class="emoji-text">🔒</span> 正式版本${oldVersion}即将上线`
-    ]
-  }
-
-  textTemplateMap = {
+  TemplateMap = {
     main: ({ gameName, oldVersion, newVersion, formattedTotalSize, incrementalSize }) => {
       const parts = [
         `✨${gameName}游戏版本更新通知`,
@@ -191,10 +146,11 @@ class Notifier extends base {
     try {
       const data = {
         ...this.screenData(game, type),
-        messages: this.templateMap[type](templateData),
+        ...templateData,
         date: new Date().toLocaleDateString(),
         type
       }
+      console.log(data)
       const img = await puppeteer.screenshot("GamePush-Plugin", data)
       api.sendToGroups(img, game, gameConfig)
     } catch (err) {
@@ -211,7 +167,7 @@ class Notifier extends base {
    */
   async sendTextMessage(type, game, gameConfig, templateData) {
     try {
-      const template = this.textTemplateMap[type]
+      const template = this.TemplateMap[type]
       if (!template) throw new Error(`未知的推送类型: ${type}`)
       const content = template(templateData)
       api.sendToGroups(content, game, gameConfig)

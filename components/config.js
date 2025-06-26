@@ -1,7 +1,7 @@
 import fs from "node:fs"
 import YAML from "yaml"
 import path from "node:path"
-import { BotName } from "#GamePush.components"
+import { BotName, pluginName } from "#GamePush.components"
 
 const CONFIG_DIR = path.join(
   process.cwd(),
@@ -29,7 +29,7 @@ class Config {
       this.loadConfig()
       this.setupWatcher()
     } catch (err) {
-      logger.error("[GamePush-Plugin] 配置初始化失败", err)
+      logger.error(`[${pluginName}] 配置初始化失败`, err)
       this.configCache = this.getDefaultConfig()
     }
   }
@@ -82,7 +82,7 @@ class Config {
         }
       }
     } catch (err) {
-      logger.error("[GamePush-Plugin] 配置加载失败", err)
+      logger.error(`[${pluginName}] 配置加载失败`, err)
       this.configCache = this.getDefaultConfig()
     }
   }
@@ -111,7 +111,7 @@ class Config {
       fs.writeFileSync(CONFIG_PATH, YAML.stringify(saveData, { indent: 2 }), "utf8")
       this.configCache = newConfig
     } catch (err) {
-      logger.error("[GamePush-Plugin] 配置保存失败", err)
+      logger.error(`[${pluginName}] 配置保存失败`, err)
     }
   }
 
@@ -123,11 +123,11 @@ class Config {
       try {
         const chokidar = await import("chokidar")
         this.watcher = chokidar.watch(CONFIG_PATH).on("change", () => {
-          logger.info("[GamePush-Plugin] 配置变更，重新加载")
+          logger.info(`[${pluginName}] 配置变更，重新加载`)
           this.loadConfig()
         })
       } catch (err) {
-        logger.error("[GamePush-Plugin] 设置配置监视器失败", err)
+        logger.error(`[${pluginName}] 设置配置监视器失败`, err)
       }
     }
   }
@@ -182,7 +182,7 @@ class Config {
       this.saveConfig(saveData)
       return { success: true, message: "游戏推送配置已保存！" }
     } catch (err) {
-      logger.error("[GamePush-Plugin] 前端配置保存失败", err)
+      logger.error(`[${pluginName}] 前端配置保存失败`, err)
       return { success: false, message: `配置保存失败: ${err.message}` }
     }
   }
