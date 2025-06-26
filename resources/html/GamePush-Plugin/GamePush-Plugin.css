@@ -10,6 +10,8 @@
   --new-version: #1890ff;
   --accent: #ff006e;
   --warning: #ff9a3c;
+  --pre-download: #00ff0a0f;
+  --pre-accent: #2e7d32;
 }
 
 @font-face {
@@ -69,7 +71,6 @@ body::before {
   z-index: 2;
 }
 
-/* 顶部背景装饰 */
 .header-bg {
   position: absolute;
   top: 0;
@@ -131,13 +132,11 @@ body::before {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* 主体内容区 */
 .main-content {
   padding: 20px 40px 30px;
   position: relative;
 }
 
-/* 三栏卡片容器 */
 .three-column-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(200px, 1fr));
@@ -205,6 +204,18 @@ body::before {
 
 .incr-card .card-title i {
   color: var(--warning);
+}
+
+.pre-card::after {
+  background: var(--pre-download);
+}
+
+.pre-card .card-title i {
+  color: var(--pre-download);
+}
+
+.pre-size {
+  color: var(--pre-download);
 }
 
 .version-display {
@@ -288,6 +299,11 @@ body::before {
   background: rgba(255, 0, 110, 0.05);
   border-radius: 12px;
   color: var(--accent);
+}
+
+.update-prompt.pre {
+  background: var(--pre-download);
+  color: var(--pre-accent);
 }
 
 .footer {
