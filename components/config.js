@@ -52,12 +52,9 @@ class Config {
   loadConfig() {
     try {
       const raw = fs.existsSync(CONFIG_PATH) ? YAML.parse(fs.readFileSync(CONFIG_PATH, "utf8")) : {}
-
       this.configCache = this.getDefaultConfig()
-
       for (const gameId of GAME_IDS) {
         if (raw[gameId]) {
-          // 将字符串数组转换为对象数组供前端使用
           const pushGroups = []
           if (Array.isArray(raw[gameId].pushGroups)) {
             for (const item of raw[gameId].pushGroups) {
@@ -67,7 +64,6 @@ class Config {
                   pushGroups.push({ botId, groupId })
                 }
               } else {
-                // 保持兼容对象格式
                 pushGroups.push(item)
               }
             }
@@ -93,11 +89,8 @@ class Config {
    */
   saveConfig(newConfig) {
     try {
-      // 创建副本，因为我们不想修改原始配置
       const saveData = {}
-
       for (const gameId of Object.keys(newConfig)) {
-        // 将对象数组转换为字符串格式
         saveData[gameId] = {
           enable: newConfig[gameId].enable,
           cron: newConfig[gameId].cron,
@@ -161,7 +154,6 @@ class Config {
    * @returns {Object} 前端配置
    */
   getFrontendConfig() {
-    // 返回转换为对象格式的配置
     return this.configCache
   }
 
