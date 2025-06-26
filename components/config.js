@@ -2,7 +2,10 @@ import fs from "node:fs"
 import YAML from "yaml"
 import path from "node:path"
 
-const CONFIG_DIR = path.join(process.cwd(), "data")
+const CONFIG_DIR = path.join(
+  process.cwd(),
+  BotName === "Karin" ? "@karinjs/karin-plugin-GamePush/config" : "data"
+)
 const CONFIG_PATH = path.join(CONFIG_DIR, "GamePush-Plugin.yaml")
 const DEFAULT_CRON = "0 0/5 * * * *"
 const GAME_IDS = ["ys", "sr", "zzz", "bh3", "ww"]
