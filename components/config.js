@@ -1,6 +1,7 @@
 import fs from "node:fs"
 import YAML from "yaml"
 import path from "node:path"
+import { BotName } from "#GamePush.components"
 
 const CONFIG_DIR = path.join(
   process.cwd(),
