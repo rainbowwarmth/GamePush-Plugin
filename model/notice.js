@@ -150,7 +150,6 @@ class Notifier extends base {
         date: new Date().toLocaleDateString(),
         type
       }
-      console.log(data)
       const img = await puppeteer.screenshot("GamePush-Plugin", data)
       api.sendToGroups(img, game, gameConfig)
     } catch (err) {
