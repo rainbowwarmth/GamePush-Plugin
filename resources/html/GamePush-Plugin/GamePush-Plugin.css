@@ -158,7 +158,7 @@ body::before {
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f0f0f0;
+  border: 0px solid #f0f0f0;
   position: relative;
   overflow: hidden;
   transition: transform 0.3s ease;
@@ -229,9 +229,9 @@ body::before {
 
 .version-display {
   display: flex;
-  align-items: center;
-  font-size: 18px;
-  font-weight: 600;
+  align-items: center; /* 垂直居中 */
+  justify-content: center; /* 水平居中 */
+  font-weight: 500;
 }
 
 .old-version {
@@ -239,6 +239,8 @@ body::before {
   text-decoration: line-through;
   padding: 5px 10px;
   border-radius: 6px;
+  font-size: 22px;
+  font-weight: 700;
   background: rgba(245, 34, 45, 0.08);
 }
 
@@ -316,24 +318,17 @@ body::before {
 }
 
 .footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
   background: rgba(245, 248, 255, 0.8);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-  padding: 20px 40px;
-  color: var(--muted);
-  font-size: 14px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  position: relative;
 }
 
 .creator-info {
-  font-weight: 500;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
+  font-size: 14px;
+  color: #718096;
 }
 
 .plugin-name {
@@ -361,8 +356,11 @@ body::before {
 }
 
 .date-info {
-  font-weight: 500;
-  color: #595959;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 14px;
+  color: #718096;
 }
 
 @media (max-width: 700px) {
