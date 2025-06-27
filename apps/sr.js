@@ -106,13 +106,13 @@ export class srPush extends plugin {
       const { data, patch } = await download.getDownloadData("sr", "main")
       if (!data) return this.reply("当前没有可用的正式版本下载", true)
 
-      const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo(
+      const { msg, client, audio, patch_client, patch_audio } = download.formatDownloadInfo(
         "sr",
         data,
         "main",
         patch
       )
-      return this.reply(await makeForwardMsg(e, [msg, clent, audio, patch_clent, patch_audio]))
+      return this.reply(await makeForwardMsg(e, [msg, client, audio, patch_client, patch_audio]))
     } catch (err) {
       logger.error("[GamePush-Plugin] 获取星铁下载链接失败", err)
       return this.reply(`❌ 获取下载链接失败: ${err.message}`, true)
@@ -127,13 +127,13 @@ export class srPush extends plugin {
       const { data, patch } = await download.getDownloadData("sr", "pre")
       if (!data) return this.reply("当前没有可用的预下载版本", true)
 
-      const { msg, clent, audio, patch_clent, patch_audio } = download.formatDownloadInfo(
+      const { msg, client, audio, patch_client, patch_audio } = download.formatDownloadInfo(
         "sr",
         data,
         "pre",
         patch
       )
-      return this.reply(await makeForwardMsg(e, [msg, clent, audio, patch_clent, patch_audio]))
+      return this.reply(await makeForwardMsg(e, [msg, client, audio, patch_client, patch_audio]))
     } catch (err) {
       logger.error("[GamePush-Plugin] 获取星铁预下载链接失败", err)
       return this.reply(`❌ 获取预下载链接失败: ${err.message}`, true)

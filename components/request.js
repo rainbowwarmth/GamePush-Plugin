@@ -12,14 +12,11 @@ class Request {
   createOptions(method, options = {}) {
     const { headers = {}, body } = options
     const Headers = body ? { "Content-Type": "application/json", ...headers } : { ...headers }
-
-    const requestOptions = {
+    return {
       method,
       headers: Headers,
       body: body ? JSON.stringify(body) : undefined
     }
-
-    return requestOptions
   }
 
   /**

@@ -162,7 +162,7 @@ class Download {
       "请选择需要的下载内容"
     ].join("\n")
 
-    const clent = this.formatPackageInfo(
+    const client = this.formatPackageInfo(
       data.game_pkgs,
       `${gameName} ${typeText}${game === "bh3" ? "游戏下载" : "游戏分卷包下载"}`,
       `${game === "bh3" ? "游戏下载" : "游戏分卷包下载"}`
@@ -174,7 +174,7 @@ class Download {
       "音频包"
     )
 
-    const patch_clent = this.formatPackageInfo(
+    const patch_client = this.formatPackageInfo(
       patch?.game_pkgs,
       `${gameName} ${typeText}游戏增量包下载`,
       "游戏增量包"
@@ -186,7 +186,7 @@ class Download {
       "音频增量包"
     )
 
-    return { msg, clent, audio, patch_clent, patch_audio }
+    return { msg, client, audio, patch_client, patch_audio }
   }
 
   /**

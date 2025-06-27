@@ -107,8 +107,8 @@ export class bh3Push extends plugin {
       const { data, patch } = await download.getDownloadData("bh3", "main")
       if (!data) return this.reply("当前没有可用的正式版本下载", true)
 
-      const { msg, clent } = download.formatDownloadInfo("bh3", data, "main", patch)
-      return this.reply(await makeForwardMsg(e, [msg, clent]))
+      const { msg, client } = download.formatDownloadInfo("bh3", data, "main", patch)
+      return this.reply(await makeForwardMsg(e, [msg, client]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
     }
@@ -122,8 +122,8 @@ export class bh3Push extends plugin {
       const { data, patch } = await download.getDownloadData("bh3", "pre")
       if (!data) return this.reply("🚫 崩坏3当前未开放预下载", true)
 
-      const { msg, clent } = download.formatDownloadInfo("bh3", data, "pre", patch)
-      return this.reply(await makeForwardMsg(e, [msg, clent]))
+      const { msg, client } = download.formatDownloadInfo("bh3", data, "pre", patch)
+      return this.reply(await makeForwardMsg(e, [msg, client]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)
     }

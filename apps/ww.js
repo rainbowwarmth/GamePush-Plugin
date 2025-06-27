@@ -106,8 +106,8 @@ export class wwPush extends plugin {
       const { data, patch } = await download.getDownloadData("ww", "main")
       if (!data) return this.reply("当前没有可用的正式版本下载", true)
 
-      const { msg, clent, patch_clent } = download.formatDownloadInfo("ww", data, "main", patch)
-      return this.reply(await makeForwardMsg(e, [msg, clent, patch_clent]))
+      const { msg, client, patch_client } = download.formatDownloadInfo("ww", data, "main", patch)
+      return this.reply(await makeForwardMsg(e, [msg, client, patch_client]))
     } catch (err) {
       return this.reply(`❌ 获取失败：${err.message}`, true)
     }
@@ -121,8 +121,8 @@ export class wwPush extends plugin {
       const { data, patch } = await download.getDownloadData("ww", "pre")
       if (!data) return this.reply("🚫 鸣潮当前未开放预下载", true)
 
-      const { msg, clent, patch_clent } = download.formatDownloadInfo("ww", data, "pre", patch)
-      return this.reply(await makeForwardMsg(e, [msg, clent, patch_clent]))
+      const { msg, client, patch_client } = download.formatDownloadInfo("ww", data, "pre", patch)
+      return this.reply(await makeForwardMsg(e, [msg, client, patch_client]))
     } catch (err) {
       return this.reply(`❌ 预下载获取失败：${err.message}`, true)
     }
