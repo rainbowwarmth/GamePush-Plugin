@@ -77,7 +77,11 @@ export default class base {
         tplFile: `${pluginPath}/resources/html/GamePush-Plugin/GamePush-Plugin.html`,
         fontsPath: `${pluginPath}/resources/fonts/`,
         pluResPath: `${pluginPath}/resources/`,
-        htmlSavePath: `${this._path}/@karinjs/${pluginName}/html/`
+        htmlSavePath: `${this._path}/@karinjs/${pluginName}/html/`,
+        plugin: {
+          name: "karin-plugin-GamePush",
+          version: PluginPackage.version
+        }
       }
     } else {
       basic = {
@@ -87,7 +91,11 @@ export default class base {
         ),
         fontsPath: path.join(this._path, "plugins/GamePush-Plugin/resources/fonts/"),
         pluResPath: path.join(this._path, "plugins/GamePush-Plugin/resources/"),
-        htmlSavePath: path.join(this._path, "tmp/html/GamePush-Plugin")
+        htmlSavePath: path.join(this._path, "tmp/html/GamePush-Plugin"),
+        plugin: {
+          name: "GamePush-Plugin",
+          version: PluginPackage.version
+        }
       }
     }
     const other = {
@@ -96,10 +104,6 @@ export default class base {
       htmlFileName: `${game}_${type}_${currentDate}.html`,
       bot: {
         name: BotName
-      },
-      plugin: {
-        name: pluginName,
-        version: PluginPackage.version
       }
     }
 

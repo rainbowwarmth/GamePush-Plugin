@@ -144,7 +144,16 @@ body::before {
   margin-bottom: 25px;
 }
 
+.cards-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+  justify-content: center;
+}
+
 .info-card {
+  flex: 1;
+  min-width: 210px;
   background: #fff;
   border-radius: 16px;
   padding: 20px;
