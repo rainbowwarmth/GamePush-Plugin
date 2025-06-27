@@ -147,7 +147,7 @@ class Config {
    * @param {Function} updater - 更新函数
    */
   updateGameConfig(game, updater) {
-    const config = { ...this.configCache }
+    const config = JSON.parse(JSON.stringify(this.configCache))
     config[game] = config[game] || this.getDefaultConfig()[game]
     updater(config[game])
     this.saveConfig(config)

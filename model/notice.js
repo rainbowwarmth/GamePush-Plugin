@@ -131,7 +131,10 @@ class Notifier extends base {
         await this.sendTextMessage(type, game, gameConfig, templateData)
       }
     } catch (err) {
-      logger.error(`[GamePush-Plugin] 推送通知失败: ${err.message}`, err)
+      logger.error(
+        `[GamePush-Plugin][${this.getGameName(game)}通知] 推送通知失败: ${err.message}`,
+        err
+      )
     }
   }
 
@@ -143,16 +146,16 @@ class Notifier extends base {
    * @param {Object} templateData - 模板数据
    */
   async sendImageMessage(type, game, gameConfig, templateData) {
-    try {
-      const data = {
-        ...this.screenData(game, type),
-        ...templateData,
-        date: new Date().toLocaleDateString(),
-        type
-      }
-      const img = await puppeteer.screenshot("GamePush-Plugin", data)
+    const data = {
+      ...this.screenData(game, type),
+      ...templateData,
+      date: new Date().toLocaleDateString(),
+      type
+    }
+    const img = await puppeteer.screenshot("GamePush-Plugin", data)
+    if (img) {
       api.sendToGroups(img, game, gameConfig)
-    } catch (err) {
+    } else {
       logger.error(`[GamePush-Plugin] 发送图片消息失败: ${err.message}`, err)
     }
   }

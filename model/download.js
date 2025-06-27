@@ -153,7 +153,7 @@ class Download {
    */
   formatDownloadInfo(game, data, type, patch) {
     const gameName = getGameName(game)
-    const version = data.version
+    const { version } = data
     const typeText = type === "pre" ? "预下载" : "正式版"
 
     const msg = [
