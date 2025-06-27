@@ -1,5 +1,5 @@
-const API_BASE = "http://localhost:2777/getGamePackages"
-const CHECK_API = "http://localhost:2777/getGameBranches"
+const API_BASE = "https://hyp-api.mihoyo.com/hyp/hyp-connect/api/getGamePackages"
+const CHECK_API = "https://hyp-api.mihoyo.com/hyp/hyp-connect/api/getGameBranches"
 const Download_API = "https://api-takumi.mihoyo.com/downloader/sophon_chunk/api/"
 const WW_API_BASE =
   "https://prod-cn-alicdn-gamestarter.kurogame.com/launcher/game/G152/10003_Y8xXrXk65DqFHEDgApn3cpK5lfczpFx5/index.json"
