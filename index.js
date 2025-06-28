@@ -1,10 +1,8 @@
 import fs from "node:fs"
-import { BotName, pluginName } from "#GamePush.components"
-logger.info(`${pluginName} 加载中`)
-logger.info("Created By rainbowwarmth")
+import { BotName, pluginName, PluginPackage } from "#GamePush.components"
 
-let apps = {}
 const startTime = Date.now()
+let apps = {}
 if (BotName !== "karin") {
   const files = fs.readdirSync(`./plugins/${pluginName}/apps`).filter((file) => {
     const isTaskFile = file.toLowerCase() === "task.js"
@@ -29,5 +27,9 @@ if (BotName !== "karin") {
     apps[name] = ret[i].value[Object.keys(ret[i].value)[0]]
   }
 }
-logger.info(`加载完成用时：${Date.now() - startTime}ms`)
+
 export { apps }
+
+logger.info("-----------------")
+logger.info(`${pluginName} v${PluginPackage.version} 加载成功~ 耗时: ${Date.now() - startTime}ms`)
+logger.info("-------^_^-------")
