@@ -42,7 +42,9 @@ export class Set extends plugin {
       ]
     })
   }
-
+/**
+ * 删除RedisKey
+ */
   async delkey() {
     try {
       const match = Object.keys(gameInfoMap).find((k) => this.e.msg.includes(k))
@@ -61,7 +63,9 @@ export class Set extends plugin {
       this.e.reply(`删除失败: ${error.message}`)
     }
   }
-
+/**
+ * 删除预下载RedisKey
+ */
   async delPrekey() {
     try {
       const match = Object.keys(gameInfoMap).find((k) => this.e.msg.includes(k))
@@ -81,6 +85,9 @@ export class Set extends plugin {
     }
   }
 
+  /**
+   * 设置RedisKey
+   */
   async setkey() {
     try {
       const match = Object.keys(gameInfoMap).find((k) => this.e.msg.includes(k))
@@ -103,6 +110,9 @@ export class Set extends plugin {
     }
   }
 
+  /**
+   * 设置预下载RedisKey
+   */
   async setPrekey() {
     try {
       const match = Object.keys(gameInfoMap).find((k) => this.e.msg.includes(k))

@@ -1,4 +1,4 @@
-import { cfg, request } from "#GamePush.components"
+import { cfg, request, pluginName } from "#GamePush.components"
 import { redis, sendGroupMsg } from "#GamePush.lib"
 import {
   base,
@@ -31,7 +31,7 @@ class ApiTools extends base {
         await this.checkVersion(true, game)
       }
     } catch (err) {
-      logger.error(`[GamePush-Plugin][${getGameName(game)}自动检查] 失败`, err)
+      logger.error(`[${pluginName}][${getGameName(game)}自动检查] 失败`, err)
     }
   }
 
@@ -42,7 +42,7 @@ class ApiTools extends base {
    */
   async checkVersion(auto = false, game = "") {
     if (!game || !GAME_CONFIG[game]) {
-      throw new Error(`[GamePush-Plugin] 无效的游戏标识: ${game}`)
+      throw new Error(`[${pluginName}] 无效的游戏标识: ${game}`)
     }
     try {
       const apiUrl = this.gameApis.get(game)
@@ -58,8 +58,8 @@ class ApiTools extends base {
         await this.processMHYData(data, game, auto)
       }
     } catch (err) {
-      logger.error(`[GamePush-Plugin][${getGameName(game)}版本监控] 错误`, err)
-      if (!auto) this.reply(`[GamePush-Plugin] ❌ 检查失败：${err.message}`)
+      logger.error(`[${pluginName}][${getGameName(game)}版本监控] 错误`, err)
+      if (!auto) this.reply(`[${pluginName}] ❌ 检查失败：${err.message}`)
     }
   }
 
@@ -85,7 +85,7 @@ class ApiTools extends base {
    */
   async processMHYData(data, game, auto) {
     const gameCheckData = data?.data?.game_branches?.[0]
-    if (!gameCheckData) throw new Error(`${getGameName(game)}游戏数据解析失败`)
+    if (!gameCheckData) throw new Error(`[${pluginName}] ${getGameName(game)}游戏数据解析失败`)
 
     await this.processMainVersion(game, gameCheckData.main?.tag, auto)
 
@@ -155,7 +155,7 @@ class ApiTools extends base {
    */
   sendToGroups(msg, game, gameConfig) {
     if (!gameConfig?.pushGroups?.length) {
-      logger.debug(`[GamePush-Plugin][${getGameName(game)}] 未配置推送群组`)
+      logger.debug(`[${pluginName}][${getGameName(game)}] 未配置推送群组`)
       return
     }
     for (const pushItem of gameConfig.pushGroups) {

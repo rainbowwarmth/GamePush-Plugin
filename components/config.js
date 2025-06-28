@@ -189,7 +189,7 @@ class Config {
           }
         ]
       }
-      logger.debug("[GamePush] 生成的前端配置:", JSON.stringify(frontendConfig, null, 2))
+      logger.debug(`[${pluginName}] 生成的前端配置:", JSON.stringify(frontendConfig, null, 2)`)
 
       return frontendConfig
     }
@@ -204,7 +204,7 @@ class Config {
     try {
       const saveData = {}
       const logger = this.logger || console
-      logger.debug("[GamePush] 接收到的原始数据:", JSON.stringify(data, null, 2))
+      logger.debug(`[${pluginName}] 接收到的原始数据:", JSON.stringify(data, null, 2)`)
 
       let isYunzaiFormat = false
       for (const gameId of GAME_IDS) {
@@ -214,7 +214,7 @@ class Config {
         }
       }
       if (isYunzaiFormat) {
-        logger.debug("[GamePush] 正在处理 Yunzai 格式的配置数据")
+        logger.debug(`[${pluginName}] 正在处理 Yunzai 格式的配置数据`)
         for (const gameId of GAME_IDS) {
           saveData[gameId] = {
             enable:
@@ -225,7 +225,7 @@ class Config {
           }
         }
       } else {
-        logger.debug("[GamePush] 正在处理 Karin 格式的配置数据")
+        logger.debug(`[${pluginName}] 正在处理 Karin 格式的配置数据`)
         for (const gameId of GAME_IDS) {
           const gameConfigArray = data[gameId] || []
           const gameConfig = gameConfigArray.length > 0 ? gameConfigArray[0] : {}
@@ -244,7 +244,7 @@ class Config {
         }
       }
 
-      logger.debug("[GamePush] 处理后的配置数据:", JSON.stringify(saveData, null, 2))
+      logger.debug(`[${pluginName}] 处理后的配置数据:`, JSON.stringify(saveData, null, 2))
 
       for (const gameId of GAME_IDS) {
         if (Array.isArray(saveData[gameId].pushGroups)) {
@@ -269,14 +269,14 @@ class Config {
 
       const saveResult = this.saveConfig(saveData)
       if (saveResult === true) {
-        logger.info("[GamePush] 配置保存成功")
+        logger.info(`[${pluginName}] 配置保存成功`)
         return { success: true, message: "游戏推送配置已保存！" }
       } else {
-        logger.error("[GamePush] 配置保存失败")
+        logger.error(`[${pluginName}] 配置保存失败`)
         return { success: false, message: "保存配置文件时出错" }
       }
     } catch (err) {
-      logger.error(`[GamePush] 前端配置保存失败`, err)
+      logger.error(`[${pluginName}] 前端配置保存失败`, err)
       return { success: false, message: `配置保存失败: ${err.message}` }
     }
   }

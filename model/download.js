@@ -1,4 +1,4 @@
-import { request } from "#GamePush.components"
+import { request, pluginName } from "#GamePush.components"
 import { api, getGameAPI, getGameName, versionComparator } from "#GamePush.model"
 
 class Download {
@@ -49,7 +49,7 @@ class Download {
       }
       return this.handleMHYData(data, type)
     } catch (err) {
-      logger.error(`[GamePush] 获取下载数据失败: ${err.message}`)
+      logger.error(`[${pluginName}] 获取下载数据失败: ${err.message}`)
       return {
         data: null,
         patch: { game_pkgs: [], audio_pkgs: [] },

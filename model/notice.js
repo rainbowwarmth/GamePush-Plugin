@@ -1,5 +1,5 @@
 import { puppeteer } from "#GamePush.lib"
-import { cfg, request } from "#GamePush.components"
+import { cfg, request, pluginName } from "#GamePush.components"
 import { api, base, download, getGameChuckAPI, getDownloadAPI } from "#GamePush.model"
 
 class Notifier extends base {
@@ -132,7 +132,7 @@ class Notifier extends base {
       }
     } catch (err) {
       logger.error(
-        `[GamePush-Plugin][${this.getGameName(game)}通知] 推送通知失败: ${err.message}`,
+        `[${pluginName}][${this.getGameName(game)}通知] 推送通知失败: ${err.message}`,
         err
       )
     }
@@ -156,7 +156,7 @@ class Notifier extends base {
     if (img) {
       api.sendToGroups(img, game, gameConfig)
     } else {
-      logger.error(`[GamePush-Plugin] 发送图片消息失败`)
+      logger.error(`[${pluginName}] 发送图片消息失败`)
     }
   }
 
@@ -170,11 +170,11 @@ class Notifier extends base {
   async sendTextMessage(type, game, gameConfig, templateData) {
     try {
       const template = this.TemplateMap[type]
-      if (!template) throw new Error(`未知的推送类型: ${type}`)
+      if (!template) throw new Error(`[${pluginName}] 未知的推送类型: ${type}`)
       const content = template(templateData)
       api.sendToGroups(content, game, gameConfig)
     } catch (err) {
-      logger.error(`[GamePush-Plugin] 发送文本消息失败: ${err.message}`, err)
+      logger.error(`[${pluginName}] 发送文本消息失败: ${err.message}`, err)
     }
   }
 }

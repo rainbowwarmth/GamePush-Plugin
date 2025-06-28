@@ -12,16 +12,16 @@ const nameMap = {
 }
 
 const tasks = gameIds.map((gameId) => {
-  const name = `[GamePush-Plugin] ${nameMap[gameId]}版本监控`
+  const name = `${nameMap[gameId]}版本监控`
   const cron = cfg.getGameConfig(gameId)?.cron || "0 0/5 * * * *"
 
-  logger.info(`创建任务: ${name} (cron: ${cron})`)
+  logger.info(`[karin-plugin-gamepush]创建任务: ${name} (cron: ${cron})`)
 
   return karin.task(name, cron, async () => {
     try {
       api.autoCheck(gameId)
     } catch (e) {
-      console.error(`${name} 任务执行错误:`, e)
+      logger.error(`[karin-plugin-gamepush] ${name} 任务执行错误:`, e)
     }
   })
 })

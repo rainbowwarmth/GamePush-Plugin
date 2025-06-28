@@ -35,19 +35,19 @@ git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin ./plugins/GamePush-P
 使用GitHub
 
 ```shell
-git clone https://github.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-GamePush
+git clone https://github.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-gamepush
 ```
 
 使用Gitee
 
 ```shell
-git clone https://gitee.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-GamePush
+git clone https://gitee.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-gamepush
 ```
 
 使用Gitcode
 
 ```shell
-git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-GamePush
+git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin ./plugins/karin-plugin-gamepush
 ```
 
 ## 使用方法

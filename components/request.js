@@ -1,4 +1,5 @@
 import fetch from "node-fetch"
+import { pluginName } from "#GamePush.components"
 
 class Request {
   /**
@@ -50,7 +51,7 @@ class Request {
   async request(method, url, options = {}) {
     const { body, responseType = "json", headers = {}, log = true, gameName } = options
     const requestOptions = this.createOptions(method, { body, headers })
-    const gamePrefix = gameName ? `[GamePush-Plugin][${gameName}]` : "[GamePush-Plugin]"
+    const gamePrefix = gameName ? `[${pluginName}][${gameName}]` : `[${pluginName}]`
     try {
       if (log) {
         logger.debug(`${gamePrefix} ${method}请求URL:`, url)
@@ -63,7 +64,7 @@ class Request {
 
       return await this.handleRequest(response, responseType)
     } catch (error) {
-      const gamePrefix = gameName ? `[GamePush-Plugin][${gameName}]` : "[GamePush-Plugin]"
+      const gamePrefix = gameName ? `[${pluginName}][${gameName}]` : `[${pluginName}]`
       if (log) logger.error(`${gamePrefix} ${method}请求失败:`, error.message)
       return false
     }
