@@ -1,5 +1,5 @@
 {
-  "name": "GamePush-Plugin",
+  "name": "karin-plugin-gamepush",
   "version": "1.0.8",
   "description": "游戏更新推送插件",
   "main": "index.js",
@@ -33,6 +33,7 @@
     "prettier": "^3.5.3"
   },
   "karin": {
+    "web": "./web.config.js",
     "apps": [
       "apps"
     ],

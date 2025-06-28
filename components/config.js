@@ -110,8 +110,10 @@ class Config {
 
       fs.writeFileSync(CONFIG_PATH, YAML.stringify(saveData, { indent: 2 }), "utf8")
       this.configCache = newConfig
+      return true
     } catch (err) {
       logger.error(`[${pluginName}] 配置保存失败`, err)
+      return false
     }
   }
 
@@ -169,20 +171,84 @@ class Config {
   saveFromFrontend(data) {
     try {
       const saveData = {}
+      const logger = this.logger || console
+      logger.debug("[GamePush] 接收到的原始数据:", JSON.stringify(data, null, 2))
 
+      let isYunzaiFormat = false
       for (const gameId of GAME_IDS) {
-        saveData[gameId] = {
-          enable: data[`${gameId}.enable`] ?? this.configCache[gameId].enable,
-          cron: data[`${gameId}.cron`] || DEFAULT_CRON,
-          pushGroups: data[`${gameId}.pushGroups`] || [],
-          pushChangeType: data[`${gameId}.pushChangeType`] || "1"
+        if (data[`${gameId}.enable`] !== undefined) {
+          isYunzaiFormat = true
+          break
+        }
+      }
+      if (isYunzaiFormat) {
+        logger.debug("[GamePush] 正在处理 Yunzai 格式的配置数据")
+        for (const gameId of GAME_IDS) {
+          saveData[gameId] = {
+            enable:
+              data[`${gameId}.enable`] !== undefined ? Boolean(data[`${gameId}.enable`]) : true,
+            cron: data[`${gameId}.cron`] || DEFAULT_CRON,
+            pushGroups: data[`${gameId}.pushGroups`] || [],
+            pushChangeType: data[`${gameId}.pushChangeType`] || "1"
+          }
+        }
+      }
+      // 3. 处理 Karin 格式的数据
+      else {
+        logger.debug("[GamePush] 正在处理 Karin 格式的配置数据")
+        for (const gameId of GAME_IDS) {
+          const gameConfigArray = data[gameId] || []
+
+          const gameConfig = gameConfigArray.length > 0 ? gameConfigArray[0] : {}
+
+          saveData[gameId] = {
+            enable: gameConfig.enable !== undefined ? Boolean(gameConfig.enable) : true,
+            cron: gameConfig.cron || DEFAULT_CRON,
+            pushGroups: gameConfig.pushGroups || [],
+            pushChangeType: gameConfig.pushChangeType || "1"
+          }
         }
       }
 
-      this.saveConfig(saveData)
-      return { success: true, message: "游戏推送配置已保存！" }
+      for (const gameId of GAME_IDS) {
+        if (!saveData[gameId]) {
+          saveData[gameId] = this.getDefaultConfig()[gameId]
+        }
+      }
+
+      logger.debug("[GamePush] 处理后的配置数据:", JSON.stringify(saveData, null, 2))
+
+      for (const gameId of GAME_IDS) {
+        if (Array.isArray(saveData[gameId].pushGroups)) {
+          const formattedGroups = []
+
+          for (const item of saveData[gameId].pushGroups) {
+            if (typeof item === "string") {
+              const [botId, groupId] = item.split(":")
+              if (botId && groupId) {
+                formattedGroups.push({ botId, groupId })
+              }
+            } else {
+              formattedGroups.push(item)
+            }
+          }
+
+          saveData[gameId].pushGroups = formattedGroups
+        } else {
+          saveData[gameId].pushGroups = []
+        }
+      }
+
+      const saveResult = this.saveConfig(saveData)
+      if (saveResult === true) {
+        logger.info("[GamePush] 配置保存成功")
+        return { success: true, message: "游戏推送配置已保存！" }
+      } else {
+        logger.error("[GamePush] 配置保存失败")
+        return { success: false, message: "保存配置文件时出错" }
+      }
     } catch (err) {
-      logger.error(`[${pluginName}] 前端配置保存失败`, err)
+      logger.error(`[GamePush] 前端配置保存失败`, err)
       return { success: false, message: `配置保存失败: ${err.message}` }
     }
   }

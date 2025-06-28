@@ -156,7 +156,7 @@ class Notifier extends base {
     if (img) {
       api.sendToGroups(img, game, gameConfig)
     } else {
-      logger.error(`[GamePush-Plugin] 发送图片消息失败: ${err.message}`, err)
+      logger.error(`[GamePush-Plugin] 发送图片消息失败`)
     }
   }
 
