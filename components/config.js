@@ -160,7 +160,39 @@ class Config {
    * @returns {Object} 前端配置
    */
   getFrontendConfig() {
-    return this.configCache
+    if (BotName !== "Karin") {
+      return this.configCache
+    } else {
+      const frontendConfig = {}
+      logger.debug("[GamePush] 当前配置缓存:", JSON.stringify(this.configCache, null, 2))
+      for (const gameId of GAME_IDS) {
+        const gameConfig = this.configCache[gameId] || this.getDefaultConfig()[gameId]
+        const pushGroups = []
+        if (Array.isArray(gameConfig.pushGroups)) {
+          for (const item of gameConfig.pushGroups) {
+            if (typeof item === "string") {
+              const [botId, groupId] = item.split(":")
+              if (botId && groupId) {
+                pushGroups.push({ botId, groupId })
+              }
+            } else if (item && typeof item === "object") {
+              pushGroups.push(item)
+            }
+          }
+        }
+        frontendConfig[gameId] = [
+          {
+            enable: gameConfig.enable,
+            cron: gameConfig.cron || DEFAULT_CRON,
+            pushGroups,
+            pushChangeType: gameConfig.pushChangeType || "1"
+          }
+        ]
+      }
+      logger.debug("[GamePush] 生成的前端配置:", JSON.stringify(frontendConfig, null, 2))
+
+      return frontendConfig
+    }
   }
 
   /**
@@ -192,15 +224,11 @@ class Config {
             pushChangeType: data[`${gameId}.pushChangeType`] || "1"
           }
         }
-      }
-      // 3. 处理 Karin 格式的数据
-      else {
+      } else {
         logger.debug("[GamePush] 正在处理 Karin 格式的配置数据")
         for (const gameId of GAME_IDS) {
           const gameConfigArray = data[gameId] || []
-
           const gameConfig = gameConfigArray.length > 0 ? gameConfigArray[0] : {}
-
           saveData[gameId] = {
             enable: gameConfig.enable !== undefined ? Boolean(gameConfig.enable) : true,
             cron: gameConfig.cron || DEFAULT_CRON,

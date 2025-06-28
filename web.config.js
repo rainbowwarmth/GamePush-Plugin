@@ -30,9 +30,12 @@ export default defineConfig({
     const currentConfig = cfg.getFrontendConfig() || {}
 
     return gameIds.map((gameId) => {
-      const gameConfig = currentConfig[gameId] || {}
+      const gameConfigArray = currentConfig[gameId] || []
+      const gameConfig = gameConfigArray.length > 0 ? gameConfigArray[0] : {}
       const gameName = gameMap[gameId]
-
+      const pushGroupsAsString = (gameConfig.pushGroups || []).map((item) => {
+        return typeof item === "string" ? item : `${item.botId}:${item.groupId}`
+      })
       return components.accordion.create(`${gameId}`, {
         label: `${gameName}推送设置`,
         title: `${gameName}推送设置`,
@@ -56,7 +59,7 @@ export default defineConfig({
               components.input.group(`pushGroups`, {
                 label: "推送群组",
                 maxRows: 10,
-                data: gameConfig[0]?.pushGroups || [],
+                data: pushGroupsAsString || [],
                 template: components.input.string("group-item", {
                   placeholder: "格式: 机器人账号:群号",
                   label: "群组设置"
@@ -89,12 +92,28 @@ export default defineConfig({
   },
   save: async (config) => {
     const saveData = {}
+
     gameIds.forEach((gameId) => {
+      // 获取该游戏的配置
       const gameSettings = config[gameId] || []
+
+      // 提取配置项
       const enable = gameSettings[0]?.enable !== undefined ? gameSettings[0]?.enable : true
       const cron = gameSettings[0]?.cron || "0 0/5 * * * *"
-      const pushGroups = gameSettings[0]?.pushGroups || []
       const pushChangeType = gameSettings[0]?.pushChangeType || "1"
+
+      // 处理 pushGroups
+      const pushGroups = []
+      const rawPushGroups = gameSettings[0]?.pushGroups || []
+      for (const item of rawPushGroups) {
+        if (typeof item === "string") {
+          pushGroups.push(item)
+        } else if (item && typeof item === "object") {
+          pushGroups.push(`${item.botId}:${item.groupId}`)
+        }
+      }
+
+      // 创建新格式的配置数组
       saveData[gameId] = [
         {
           enable,
