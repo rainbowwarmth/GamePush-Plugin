@@ -16,7 +16,7 @@ export default defineConfig({
     author: {
       name: "RainBow",
       home: "https://github.com/rainbowwarmth/",
-      avatar: "https://github.com/rainbowwarmth.png"
+      avatar: "https://gitee.com/rainbowwarmth.png"
     },
     icon: {
       name: "game",
@@ -82,7 +82,7 @@ export default defineConfig({
                     value: "2"
                   })
                 ],
-                description: "选择推送的变更类型"
+                description: "选择推送的通知类型"
               })
             ]
           })
