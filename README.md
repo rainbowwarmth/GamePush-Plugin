@@ -5,7 +5,7 @@
 ![GamePush](https://img.shields.io/badge/GamePush-Plugin-blue?style=for-the-badge&logo=gamepad)
 ![Karin](https://img.shields.io/badge/Karin-Bot-green?style=for-the-badge&logo=robot)
 ![Miao-Yunzai](https://img.shields.io/badge/Miao-Yunzai-green?style=for-the-badge&logo=robot)
- ![TRSS-Yunzai](https://img.shields.io/badge/TRSS-Yunzai-green?style=for-the-badge&logo=robot)
+![TRSS-Yunzai](https://img.shields.io/badge/TRSS-Yunzai-green?style=for-the-badge&logo=robot)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 ![Node.js](https://img.shields.io/badge/Node.js-22+-brightgreen?style=for-the-badge&logo=node.js)
 
@@ -52,10 +52,17 @@ _实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏�
 
 ```bash
 # 使用 Miao-Yunzai 和 TRSS-Yunzai
+## 使用GitCode
+git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin.git ./plugins/GamePush-Plugin
+## 使用GitHub
 git clone https://github.com/rainbowwarmth/GamePush-Plugin.git ./plugins/GamePush-Plugin
 
 # 使用 Karin
-git clone https://github.com/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-plugin/gamepush
+## 使用GitCode
+git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-plugin-gamepush
+## 使用GitHub
+git clone https://github.com/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-plugin-gamepush
+
 ```
 
 2. **安装依赖**
@@ -109,7 +116,7 @@ pnpm install -P
 
 ```javascript
 // 默认配置
-cron: "0 0/5 * * * *"; // 每5分钟执行一次
+cron: "0 0/5 * * * *" // 每5分钟执行一次
 ```
 
 ### Guoba 、Karin-web 可视化配置
