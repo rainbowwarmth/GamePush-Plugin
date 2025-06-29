@@ -12,7 +12,7 @@ const gameMap = {
 export default defineConfig({
   info: {
     id: "karin-plugin-gamepush",
-    name: "游戏更新推送插件",
+    name: "游戏推送",
     author: {
       name: "RainBow",
       home: "https://github.com/rainbowwarmth/",

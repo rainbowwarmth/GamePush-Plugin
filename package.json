@@ -1,7 +1,7 @@
 {
   "name": "GamePush-Plugin",
   "version": "1.0.8",
-  "description": "游戏更新推送插件，支持Yunzai和Karin",
+  "description": "自动监控游戏版本更新并推送通知，支持Yunzai和Karin",
   "main": "index.js",
   "author": "rainbowwarmth",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-prettier": "^5.5.0",
     "eslint-plugin-promise": "^6.6.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.6.2"
   },
   "karin": {
     "web": "./web.config.js",
