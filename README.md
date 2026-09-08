@@ -6,6 +6,7 @@
 ![Karin](https://img.shields.io/badge/Karin-Bot-green?style=for-the-badge&logo=robot)
 ![Miao-Yunzai](https://img.shields.io/badge/Miao-Yunzai-green?style=for-the-badge&logo=robot)
 ![TRSS-Yunzai](https://img.shields.io/badge/TRSS-Yunzai-green?style=for-the-badge&logo=robot)
+![Yunzai-NG](https://img.shields.io/badge/Yunzai-NG-green?style=for-the-badge&logo=robot)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 ![Node.js](https://img.shields.io/badge/Node.js-22+-brightgreen?style=for-the-badge&logo=node.js)
 
@@ -26,15 +27,19 @@ _实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏�
 - 🔥 **绝区零** (Zenless Zone Zero)
 - ⚡ **崩坏 3** (Honkai Impact 3rd)
 - 🌊 **鸣潮** (Wuthering Waves)
+- 🧪 **明日方舟：终末地** (Arknights: Endfield) —— 实验性支持
 
 ### 🛠️ 核心功能
 
 - 📱 **版本监控** - 实时检测游戏版本更新
 - 🔔 **自动推送** - 版本更新及预下载通知
-- ⚙️ **灵活配置** - 支持开启/关闭推送功能
+- 🖼️ **图文推送** - 支持图片（可选模板）与纯文字两种推送形式
+- 📥 **下载链接** - 获取正式版 / 预下载的客户端、资源包直链
+- 📊 **历史数据** - 记录各版本包体与更新包大小，可随时查询
+- ⚙️ **灵活配置** - 每个游戏独立配置推送开关、频率与推送群
 - 🕐 **定时任务** - 自动定时检查更新
-- 💾 **Redis 存储** - 高效的数据管理
-- 🎛️ **Guoba、Karin-Web 支持** - 可视化配置界面
+- 🧩 **多框架适配** - 运行时抽象层统一 Yunzai / Karin / Yunzai-NG 差异
+- 🎛️ **Guoba、Karin-Web、Yunzai-NG 面板支持** - 可视化配置界面
 
 ---
 
@@ -42,16 +47,16 @@ _实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏�
 
 ### 前置要求
 
-- ✅ [Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai) , [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai), [Karin](https://github.com/KarinJS/Karin)
+- ✅ [Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai) , [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai), [Karin](https://github.com/KarinJS/Karin), [Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng)
 - ✅ [nodejs 22+](https://nodejs.org/zh-cn/download)
-- ✅ [Redis 数据库](https://redis.io/)
+- ✅ [Redis 数据库](https://redis.io/)（Miao-Yunzai / TRSS-Yunzai / Karin 需要；Yunzai-NG 使用框架内置 KV，无需额外部署）
 
 ### 安装步骤
 
 1. **克隆插件**
 
 ```bash
-# 使用 Miao-Yunzai 和 TRSS-Yunzai
+# 使用 Miao-Yunzai、TRSS-Yunzai 和 Yunzai-NG
 ## 使用GitCode
 git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin.git ./plugins/GamePush-Plugin
 ## 使用Gitee
@@ -73,17 +78,23 @@ git clone https://github.com/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-p
 
 ```
 
+> ⚠️ 插件通过目录名判断运行环境：Karin 必须使用 `karin-plugin-gamepush` 目录名，其余框架请保持 `GamePush-Plugin`。
+
 2. **安装依赖**
 
 ```bash
 pnpm install -P
 ```
 
+> 💡 Yunzai-NG 依赖 `@yunzai-ng/core`（已声明为 optionalDependencies，正常安装即会引入）。
+
 3. **启动机器人**
 
 ```bash
-# 重启Miao-Yunzai 或 TRSS-Yunzai 或 Karin 即可自动加载插件
+# 重启 Miao-Yunzai 或 TRSS-Yunzai 或 Karin 或 Yunzai-NG 即可自动加载插件
 ```
+
+首次加载时插件会自动从远端拉取游戏版本数据库（`GamePush-Plugin.db`），并在后续启动时按版本号增量更新。
 
 ---
 
@@ -91,53 +102,86 @@ pnpm install -P
 
 ### 基础命令
 
-| 命令                  | 功能                       | 权限     | 特别说明              |
-| --------------------- | -------------------------- | -------- | --------------------- |
-| `#原神版本监控`       | 检查原神版本状态           | Master   |                       |
-| `#原神开启版本推送`   | 开启原神版本推送           | Master   |                       |
-| `#原神关闭版本推送`   | 关闭原神版本推送           | Master   |                       |
-| `#原神当前版本`       | 查看原神当前版本           | 所有用户 |                       |
-| `#原神版本数据`       | 查看原神历史版本更新大小   | 所有用户 |                       |
-| `#星铁获取下载链接`   | 查看星铁当前版本下载链接   | 所有用户 | 原神、崩坏3不支持获取 |
-| `#星铁获取预下载链接` | 查看星铁当前版本预下载链接 | 所有用户 | 原神、崩坏3不支持获取 |
+以原神为例（其他游戏替换对应前缀即可）：
+
+| 命令                  | 功能                       | 权限     | 特别说明                        |
+| --------------------- | -------------------------- | -------- | ------------------------------- |
+| `#原神版本监控`       | 立即执行一次版本检查       | Master   |                                 |
+| `#原神开启版本推送`   | 在当前群开启版本推送       | Master   | 仅限群聊                        |
+| `#原神关闭版本推送`   | 在当前群关闭版本推送       | Master   | 仅限群聊                        |
+| `#原神当前版本`       | 查看正式版与预下载版本号   | 所有用户 |                                 |
+| `#原神版本数据`       | 查看历史版本大小列表       | 所有用户 | 以合并转发发送                  |
+| `#原神版本数据 5.0`   | 查看指定版本的详细数据     | 所有用户 |                                 |
+| `#星铁获取下载链接`   | 获取当前正式版本下载链接   | 所有用户 | 仅星铁、绝区零、鸣潮、终末地    |
+| `#星铁获取预下载链接` | 获取当前预下载版本下载链接 | 所有用户 | 仅星铁、绝区零、鸣潮、终末地    |
+
+> 📝 原神的游戏前缀可省略，即 `#版本监控`、`#当前版本` 等命令默认作用于原神。
 
 ### 支持的游戏命令前缀
 
-- 🌟 原神: `#` / `#原神` / `#ys` / `#YS`
-- ⭐ 星铁: `*` / `#星铁` / `#sr` / `#SR`
-- 🔥 绝区零: `%` / `#绝区零` / `#zzz` / `#ZZZ`
-- ⚡ 崩坏 3: `!` / `#崩三` / `#bh3` / `#BH3`
-- 🌊 鸣潮: `~` / `#鸣潮` / `#ww` / `#WW`
+- 🌟 原神: `#原神` / `#ys` / `#YS`（可省略）
+- ⭐ 星铁: `*` / `#星铁` / `#崩铁` / `#星穹` / `#星轨` / `#穹轨` / `#铁道` / `#星穹铁道` / `#崩坏星穹铁道`
+- 🔥 绝区零: `%` / `％` / `#绝区零` / `#绝区` / `#zzz` / `#ZZZ`
+- ⚡ 崩坏 3: `!` / `！` / `#崩三` / `#崩3` / `#崩坏3` / `#崩坏三` / `#三崩子` / `#bbb`
+- 🌊 鸣潮: `~` / `～` / `#鸣潮` / `#ww` / `#WW` / `#mc`
+- 🧪 终末地: `:` / `：` / `#终末地` / `#zmd`
 
 ### 管理命令
 
 | 命令                        | 功能                       | 权限   |
 | --------------------------- | -------------------------- | ------ |
-| `#[游戏]删除rediskey`       | 删除游戏 Redis 键值        | Master |
-| `#[游戏]删除预下载rediskey` | 删除预下载 Redis 键值      | Master |
-| `#[游戏]设置rediskey`       | 设置游戏 Redis 键值        | Master |
-| `#[游戏]设置预下载rediskey` | 设置游戏预下载 Redis 键值  | Master |
-| `#更新游戏版本数据`         | 强制覆盖本地的游戏版本数据 | Master |
+| `#[游戏]删除rediskey`       | 删除游戏版本键值           | Master |
+| `#[游戏]删除预下载rediskey` | 删除预下载版本键值         | Master |
+| `#[游戏]设置rediskey 5.0`   | 设置游戏版本键值           | Master |
+| `#[游戏]设置预下载rediskey 5.1` | 设置游戏预下载版本键值 | Master |
+| `#更新游戏版本数据`         | 强制拉取并合并远端版本数据 | Master |
+
+> 🔧 版本键值用于对比新旧版本，删除后下次检查会重新推送；省略游戏前缀时默认作用于原神。
 
 ---
 
 ## ⚙️ 配置说明
 
-### 定时任务配置
+### 配置文件位置
 
-插件支持自定义定时任务，默认每 5 分钟检查一次：
+| 框架                        | 配置文件                                                    |
+| --------------------------- | ----------------------------------------------------------- |
+| Miao-Yunzai / TRSS-Yunzai   | `data/GamePush-Plugin.yaml`                                 |
+| Karin                       | `@karinjs/karin-plugin-gamepush/config/GamePush-Plugin.yaml` |
+| Yunzai-NG                   | `config/GamePush-Plugin.yaml`（由内核托管，面板可视化编辑） |
 
-```javascript
-// 默认配置
-cron: "0 0/5 * * * *" // 每5分钟执行一次
-```
+### 配置项
 
-### Guoba 、Karin-web 可视化配置
+每个游戏（`ys` / `sr` / `zzz` / `bh3` / `ww` / `zmd`）都有一份独立配置：
 
-插件支持 Guoba 插件和 Karin-Web 的可视化配置界面，可以通过 Web 界面进行：
+| 配置项           | 说明                                        | 默认值            |
+| ---------------- | ------------------------------------------- | ----------------- |
+| `enable`         | 是否监控该游戏版本更新                      | `true`            |
+| `log`            | 是否输出定时任务详细日志                    | `false`           |
+| `cron`           | 版本检查的 cron 表达式                      | `0 0/5 * * * *`   |
+| `pushGroups`     | 推送列表，元素为 `{ botId, groupId }`       | `[]`              |
+| `pushChangeType` | 推送形式：`1` 图片消息 / `2` 文字消息       | `1`               |
+| `html`           | 图片模板：`default` 默认 / `Simple` 简约    | `default`         |
 
-- 🎛️ 推送开关设置
-- ⏰ 定时任务配置
+配置文件支持热更新，保存后自动重新加载，无需重启。
+
+### 可视化配置
+
+插件同时支持三套可视化配置界面，可修改推送开关、检查频率、推送群、消息类型与模板：
+
+- 🎛️ [Guoba-Plugin](https://github.com/guoba-yunzai/guoba-plugin)（Miao-Yunzai / TRSS-Yunzai）
+- 🎛️ Karin-Web（Karin）
+- 🎛️ Yunzai-NG WebUI 面板（Yunzai-NG）
+
+---
+
+## 💾 数据存储
+
+- **版本键值**（KV）：Yunzai / Karin 使用 Redis，Yunzai-NG 使用框架内置 KV
+- **历史版本数据**（SQLite）：`main` 表记录正式版本包体大小，`pre` 表记录预下载版本更新大小
+  - Miao-Yunzai / TRSS-Yunzai：`data/GamePush-Plugin.db`
+  - Karin：`@karinjs/karin-plugin-gamepush/data/GamePush-Plugin.db`
+  - Yunzai-NG：`data/sql/GamePush-Plugin/GamePush-Plugin.db`
 
 ---
 
@@ -145,22 +189,33 @@ cron: "0 0/5 * * * *" // 每5分钟执行一次
 
 ```
 GamePush-Plugin/
-├── 📁 apps/           # 功能模块
-│   ├── 🎮 ys.js       # 原神功能
-│   ├── ⭐ sr.js       # 星铁功能
-│   ├── 🔥 zzz.js      # 绝区零功能
-│   ├── ⚡ bh3.js      # 崩坏3功能
-│   ├── 🌊 ww.js       # 鸣潮功能
-│   ├── ⚙️ set.js      # 设置管理
-│   └── 📋 task.js     # 定时任务
-├── 📁 components/     # 组件模块
-├── 📁 lib/           # 工具库
-├── 📁 model/         # 数据模型
-├── 📁 resources/     # 资源文件
-├── 🔧 index.js       # 入口文件
-├── 🎛️ guoba.support.js # Guoba支持
-├── 🎛️ web.config.js # Karin-Web 支持
-└── 📦 package.json   # 项目配置
+├── 📁 apps/              # 功能模块（Yunzai / Karin 加载）
+│   ├── 🧩 base.js        # 游戏功能基类
+│   ├── 🎮 ys.js          # 原神功能
+│   ├── ⭐ sr.js          # 星铁功能
+│   ├── 🔥 zzz.js         # 绝区零功能
+│   ├── ⚡ bh3.js         # 崩坏3功能
+│   ├── 🌊 ww.js          # 鸣潮功能
+│   ├── 🧪 zmd.js         # 终末地功能
+│   ├── ⚙️ set.js         # 主人功能
+│   └── 📋 task.js        # 定时任务
+├── 📁 components/        # 基础组件（路径、配置、请求）
+├── 📁 lib/               # 工具库
+│   └── 📁 runtime/       # 运行时抽象层（Yunzai / Karin / Yunzai-NG 适配器）
+├── 📁 model/             # 业务模型
+│   ├── 🧭 commands.js    # 命令描述符（跨框架共用）
+│   ├── 🔍 api.js         # 版本检查
+│   ├── 🔔 notice.js      # 推送通知
+│   ├── 📥 download.js    # 下载链接
+│   ├── 💾 db.js          # SQLite 版本数据
+│   ├── 🎛️ guoba.js       # Guoba 配置面板
+│   ├── 🎛️ webconfig.js   # Karin-Web 配置面板
+│   └── 🧱 plugin.js      # Yunzai-NG 插件定义
+├── 📁 resources/         # 资源文件（HTML 模板、字体）
+├── 🔧 index.js           # 入口文件
+├── 🎛️ guoba.support.js   # Guoba 支持
+├── 🎛️ web.config.js      # Karin-Web 支持
+└── 📦 package.json       # 项目配置
 ```
 
 ---
@@ -169,17 +224,19 @@ GamePush-Plugin/
 
 ### 技术栈
 
-- **框架**: [Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai) 、 [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai) 、[Karin](https://github.com/KarinJS/Karin)
+- **框架**: [Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai) 、 [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai) 、[Karin](https://github.com/KarinJS/Karin) 、[Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng)
 - **语言**: JavaScript (ES6+)
-- **数据库**: [Redis](https://redis.io/)
+- **存储**: [Redis](https://redis.io/) / 框架内置 KV + SQLite（[Sequelize](https://sequelize.org/)）
 - **任务调度**: Cron
-- **配置管理**: Guoba 、Karin-Web
+- **配置管理**: Guoba 、Karin-Web 、Yunzai-NG 面板
 
 ### 核心特性
 
+- 🧩 **运行时抽象层** - 业务代码只依赖 `rt` 接口，框架差异由适配器消化
+- 🧭 **命令描述符** - 命令逻辑写成纯函数，各框架按自己的方式注册
 - 🔄 **模块化设计** - 每个游戏独立模块
 - 📡 **API 监控** - 实时获取官方版本信息
-- 💾 **数据持久化** - Redis 存储历史版本数据
+- 💾 **数据持久化** - KV 存版本、SQLite 存历史数据
 - 🎯 **精准推送** - 避免重复通知
 - ⚡ **高性能** - 异步处理，低资源占用
 
@@ -218,6 +275,7 @@ GamePush-Plugin/
 - [Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai) - 强大的机器人框架
 - [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai) - 强大的机器人框架
 - [Karin](https://github.com/KarinJS/Karin) - 强大的机器人框架
+- [Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng) - 强大的机器人框架
 - [Guoba-Plugin](https://github.com/guoba-yunzai/guoba-plugin) - 可视化配置支持
 
 ---
