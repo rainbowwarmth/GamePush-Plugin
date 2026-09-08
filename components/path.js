@@ -14,17 +14,23 @@ const BotPackage = JSON.parse(fs.readFileSync(path.join(_path, "package.json"), 
 
 const pluginName = path.basename(path.join(import.meta.url, "../../"))
 
+const logger = globalThis.logger ?? console
+
 const BotName = (() => {
   if (pluginName.includes("karin")) {
     return "Karin"
-  } else if (BotPackage.name == "miao-yunzai") {
+  } else if (BotPackage.name === "yunzai-ng") {
+    return "Yunzai-NG"
+  } else if (BotPackage.name === "miao-yunzai") {
     return "Miao-Yunzai"
   } else if (BotPackage.name === "trss-yunzai") {
     return "Trss-Yunzai"
   } else if (BotPackage.name === "yunzai") {
-    logger.error("[GamePush-Plugin] 未适配的框架, 请使用Miao-Yunzai或Trss-Yunzai")
+    logger.error("[GamePush-Plugin] 未适配的框架, 请使用Miao-Yunzai、Trss-Yunzai或yunzai-ng")
+    return "Unknown"
   } else {
-    logger.error("[GamePush-Plugin] 未适配的框架, 请使用Miao-Yunzai或Trss-Yunzai")
+    logger.error("[GamePush-Plugin] 未适配的框架, 请使用Miao-Yunzai、Trss-Yunzai或yunzai-ng")
+    return "Unknown"
   }
 })()
 

@@ -1,7 +1,7 @@
 {
   "name": "GamePush-Plugin",
-  "version": "1.0.14",
-  "description": "自动监控游戏版本更新并推送通知，支持Yunzai和Karin",
+  "version": "1.1.0",
+  "description": "自动监控游戏版本更新并推送通知，支持Yunzai、Karin和yunzai-ng",
   "main": "index.js",
   "author": "rainbowwarmth",
   "license": "MIT",
@@ -21,6 +21,9 @@
     "node-fetch": "^3.3.2",
     "yaml": "^2.8.1",
     "sequelize": "^6.37.7"
+  },
+  "optionalDependencies": {
+    "@yunzai-ng/core": "0.2.0"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
@@ -47,6 +50,12 @@
   "imports": {
     "#GamePush.lib": "./lib/index.js",
     "#GamePush.model": "./model/index.js",
-    "#GamePush.components": "./components/index.js"
+    "#GamePush.model/commands": "./model/commands.js",
+    "#GamePush.model/util": "./model/util.js",
+    "#GamePush.model/plugin": "./model/plugin.js",
+    "#GamePush.model/guoba": "./model/guoba.js",
+    "#GamePush.model/webconfig": "./model/webconfig.js",
+    "#GamePush.components": "./components/index.js",
+    "#GamePush.runtime": "./lib/runtime/index.js"
   }
 }

@@ -1,5 +1,6 @@
 import { cfg, request, pluginName } from "#GamePush.components"
-import { redis, sendGroupMsg } from "#GamePush.lib"
+import { sendGroupMsg } from "#GamePush.lib"
+import { rt } from "#GamePush.runtime"
 import {
   base,
   notice,
@@ -152,7 +153,7 @@ class ApiTools extends base {
 
     // 第二步：用本地旧版本请求，获取 patch 差分增量包 + pkg 完整包
     const { main: redisKey } = getRedisKeys(game)
-    const oldVer = (await redis.get(redisKey)) || ""
+    const oldVer = (await rt.kv.get(redisKey)) || ""
 
     const versionRes = await request.post(url, makeBody(oldVer), {
       headers,
@@ -181,12 +182,12 @@ class ApiTools extends base {
    */
   async processHypergryphPreDownload(game, prePatch, currentVersion, auto) {
     const { pre: preKey } = getRedisKeys(game)
-    const storedPre = await redis.get(preKey)
+    const storedPre = await rt.kv.get(preKey)
 
     if (prePatch?.version) {
       const preVersion = prePatch.version
       if (preVersion !== storedPre) {
-        await redis.set(preKey, preVersion)
+        await rt.kv.set(preKey, preVersion)
         notice.pushNotify({
           type: "pre",
           game,
@@ -196,7 +197,7 @@ class ApiTools extends base {
         })
       }
     } else if (storedPre) {
-      await redis.del(preKey)
+      await rt.kv.del(preKey)
       notice.pushNotify({
         type: "pre-remove",
         game,
@@ -215,7 +216,7 @@ class ApiTools extends base {
     if (!currentVersion) return
 
     const { main: redisKey } = getRedisKeys(game)
-    const stored = (await redis.get(redisKey)) || "0.0.0"
+    const stored = (await rt.kv.get(redisKey)) || "0.0.0"
 
     if (versionComparator.compare(currentVersion, stored) > 0) {
       await notice.pushNotify({
@@ -225,7 +226,7 @@ class ApiTools extends base {
         oldVersion: stored,
         pushChangeType: cfg.getGameConfig(game).pushChangeType
       })
-      await redis.set(redisKey, currentVersion)
+      await rt.kv.set(redisKey, currentVersion)
     }
   }
 
@@ -237,11 +238,11 @@ class ApiTools extends base {
   async processPreDownload(game, preData) {
     const { pre: preKey } = getRedisKeys(game)
     const currentPre = game === "ww" ? preData?.version : preData?.tag
-    const storedPre = await redis.get(preKey)
+    const storedPre = await rt.kv.get(preKey)
 
     if (currentPre) {
       if (currentPre !== storedPre) {
-        await redis.set(preKey, currentPre)
+        await rt.kv.set(preKey, currentPre)
         notice.pushNotify({
           type: "pre",
           game,
@@ -251,7 +252,7 @@ class ApiTools extends base {
         })
       }
     } else if (storedPre) {
-      await redis.del(preKey)
+      await rt.kv.del(preKey)
       notice.pushNotify({
         type: "pre-remove",
         game,

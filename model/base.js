@@ -42,6 +42,29 @@ export default class base {
   }
 
   /**
+   * 把图标 URL 下载并内联为 base64 data URI
+   *
+   * 渲染器按 networkidle2 判定加载完成（在途连接 ≤2 即视为空闲），而页面里唯一的
+   * 网络资源就是这个图标——只剩它 1 个请求在下载时 networkidle2 已判定空闲并截图，
+   * 图标遂空白。改为在 Node 端预取字节内联进 <img>，渲染时不再有网络依赖。
+   * 取字节失败时回落原 URL（不比现状更差）。
+   * @param {string} url - 图标地址
+   * @returns {Promise<string>} data URI 或原始 URL
+   */
+  async embedIcon(url) {
+    if (!url || url.startsWith("data:")) return url
+    try {
+      const res = await request.get(url, { responseType: "raw", log: false })
+      if (!res?.ok) return url
+      const buf = Buffer.from(await res.arrayBuffer())
+      const mime = (res.headers.get("content-type") || "image/png").split(";")[0].trim()
+      return `data:${mime};base64,${buf.toString("base64")}`
+    } catch {
+      return url
+    }
+  }
+
+  /**
    * @returns {string} 当前日期，格式为YYYYMMDD
    */
   getCurrentDate() {
@@ -107,7 +130,7 @@ export default class base {
       ...other,
       ...basic,
       gameName: GAME_CONFIG[game]?.name || "未知游戏",
-      icon: iconUrl
+      icon: await this.embedIcon(iconUrl)
     }
   }
 }

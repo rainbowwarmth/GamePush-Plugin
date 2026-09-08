@@ -1,6 +1,6 @@
 import { request, pluginName } from "#GamePush.components"
 import { api, getGameAPI, getGameName, getRedisKeys, versionComparator } from "#GamePush.model"
-import { redis } from "#GamePush.lib"
+import { rt } from "#GamePush.runtime"
 
 class Download {
   cache = new Map()
@@ -250,7 +250,7 @@ class Download {
     } else {
       // 正式版：用本地旧版本请求，获取 patch 差分增量包 + pkg 完整包
       const mainKey = getRedisKeys("zmd").main
-      const oldVer = (await redis.get(mainKey)) || ""
+      const oldVer = (await rt.kv.get(mainKey)) || ""
 
       const versionRes = await request.post(url, makeBody(oldVer), {
         headers,

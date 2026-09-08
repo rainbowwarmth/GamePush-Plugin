@@ -1,5 +1,6 @@
 import { puppeteer } from "#GamePush.lib"
 import { cfg, request, pluginName } from "#GamePush.components"
+import { rt } from "#GamePush.runtime"
 import {
   db,
   api,
@@ -11,7 +12,6 @@ import {
   getGameName,
   getRedisKeys
 } from "#GamePush.model"
-import { redis } from "#GamePush.lib"
 
 class Notifier extends base {
   TemplateMap = {
@@ -67,11 +67,11 @@ class Notifier extends base {
       )
       switch (type) {
         case "main":
-          await (await db).storeMainSizeData(game, newVersion, formattedTotalSize)
+          await rt.db.storeMainSizeData(game, newVersion, formattedTotalSize)
           break
         case "pre":
           if (Ver) {
-            await (await db).storePreSizeData(game, newVersion, Ver, incrementalSize)
+            await rt.db.storePreSizeData(game, newVersion, Ver, incrementalSize)
           }
           break
         case "pre-remove":
@@ -143,7 +143,7 @@ class Notifier extends base {
       }
 
       const mainKey = getRedisKeys(game).main
-      Ver = (await redis.get(mainKey)) || ""
+      Ver = (await rt.kv.get(mainKey)) || ""
       return { formattedTotalSize, incrementalSize, Ver }
     }
 

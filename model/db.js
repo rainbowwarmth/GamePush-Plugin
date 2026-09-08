@@ -23,7 +23,15 @@ class GamePushDB {
   }
 
   async ensureInitialized() {
-    return (this.initPromise ??= this.initialize().then(() => true))
+    // 失败时清空缓存，让下一次调用可以重试（否则一次网络失败会永久缓存 reject）
+    this.initPromise ??= this.initialize().then(
+      () => true,
+      (err) => {
+        this.initPromise = null
+        throw err
+      }
+    )
+    return this.initPromise
   }
 
   ensureDirExists() {
@@ -130,14 +138,19 @@ class GamePushDB {
       storage: this.DB_PATH,
       logging: false,
       define: { freezeTableName: true, timestamps: false },
-      dialectOptions: { foreign_keys: "ON" }
+      dialectOptions: { foreign_keys: "ON" },
+      pool: { max: 1, min: 0, idle: 10_000 }
     })
 
     await this.sequelize.authenticate()
+    // 与运行时适配器共用同一库文件，撞锁时等待重试而不是立刻 SQLITE_BUSY
+    await this.sequelize.query("PRAGMA busy_timeout = 5000")
     logger.debug(`[${pluginName}] 📊 数据库连接成功: ${this.DB_PATH}`)
 
     this.initializeModels()
-    await this.sequelize.sync({ alter: true })
+    // 不用 sync({alter: true})：SQLite 的 alter 会重建表，与运行时适配器
+    // 的建表并发时会互相踩（no such table）；缺表用 sync() 建即可
+    await this.sequelize.sync()
     logger.debug(`[${pluginName}] ✅ 数据库模型同步完成`)
   }
 
@@ -211,6 +224,13 @@ class GamePushDB {
 }
 
 const dbInstance = new GamePushDB()
-const dbPromise = dbInstance.ensureInitialized().then(() => dbInstance)
+const dbPromise = BotName === "Yunzai-NG"
+  ? Promise.resolve(dbInstance)
+  : dbInstance.ensureInitialized().then(() => dbInstance)
+
+// dbPromise 无直接消费方，标记 rejection 已处理避免 unhandledRejection 噪音
+dbPromise.catch((err) => {
+  logger.error(`[${pluginName}] ❌ 数据库初始化失败: ${err.message}`)
+})
 
 export default dbPromise
