@@ -25,6 +25,8 @@ const BotName = (() => {
     return "Miao-Yunzai"
   } else if (BotPackage.name === "trss-yunzai") {
     return "Trss-Yunzai"
+  } else if (BotPackage.name === "MangoCat-Yunzai") {
+    return "MangoCat-Yunzai"
   } else if (BotPackage.name === "yunzai") {
     logger.error("[GamePush-Plugin] 未适配的框架, 请使用Miao-Yunzai、Trss-Yunzai或yunzai-ng")
     return "Unknown"
