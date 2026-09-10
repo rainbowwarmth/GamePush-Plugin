@@ -4,15 +4,17 @@
  */
 import { GAME_CONFIG, getGameName, getRedisKeys } from "./util.js"
 import { cfg } from "../components/index.js"
+import { attachCurrentVersionButtons } from "../lib/runtime/buttons.js"
+
+export { buildCurrentVersionButtons } from "../lib/runtime/buttons.js"
 
 // 延迟导入以避免循环依赖
-let api, db, notice
+let api, notice
 
 async function ensureModel() {
   if (!api) {
     const model = await import("./index.js")
     api = model.api
-    db = model.db
     notice = model.notice
   }
 }
@@ -140,7 +142,9 @@ async function handleCurrentVersion(e, meta, rt) {
     `预下载版本：${preVer || "未开启"}`
   ].join("\n")
 
-  return e.reply(msg, true)
+  return e.reply(
+    attachCurrentVersionButtons(msg, meta.gameId, rt.commandButtons)
+  )
 }
 
 /**

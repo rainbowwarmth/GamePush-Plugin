@@ -6,8 +6,12 @@
   "author": "rainbowwarmth",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "lint": "eslint --ext .js,.vue src",
+    "test:sqlite": "node --test test/*.test.js",
     "format": "prettier --write \"./**/*.{js,vue}\"",
     "fix": "eslint --fix --ext .js && npm run format"
   },
@@ -19,11 +23,7 @@
   "dependencies": {
     "chokidar": "^4.0.3",
     "node-fetch": "^3.3.2",
-    "yaml": "^2.8.1",
-    "sequelize": "^6.37.7"
-  },
-  "optionalDependencies": {
-    "@yunzai-ng/core": "0.2.0"
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
