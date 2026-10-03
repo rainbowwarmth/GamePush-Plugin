@@ -1,15 +1,16 @@
 # ⚠️ 本文件是 .github/ISSUE_TEMPLATE/framework_compat.yml 的镜像副本，供 CNB（读取 .cnb/ISSUE_TEMPLATE）使用。
 # 修改模板时请同步更新两处，避免各平台内容不一致。
-name: 🧩 框架适配 / 兼容问题
-description: 安装失败、启动报错、命令不响应、面板打不开等框架适配问题
-title: "[适配] "
+name: 🧩 框架兼容问题
+description: 已支持的六个框架下出现安装失败、启动报错、命令不响应、面板打不开等问题
+title: "[兼容] "
 labels:
   - bug
 body:
   - type: markdown
     attributes:
       value: |
-        本插件同源适配六框架，适配类问题请务必填写完整的环境信息。
+        本插件同源适配六框架，已支持框架下的故障请务必填写完整的环境信息。
+        如需申请适配**全新的框架**，请改用「🧱 新框架适配申请」模板。
 
   - type: dropdown
     id: framework

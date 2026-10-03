@@ -1,0 +1,108 @@
+name: 🧱 新框架适配申请
+description: 申请为尚未支持的机器人框架增加适配
+title: "[适配申请] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        本插件目前已支持 **Miao-Yunzai / TRSS-Yunzai / MangoCat-Yunzai / JiuLi（玖璃）/ Karin / Yunzai-NG** 六个框架。
+        如果你的框架**已支持但出了故障**，请改用「框架兼容问题」模板；本模板仅用于申请适配**全新的框架**。
+
+  - type: input
+    id: framework-name
+    attributes:
+      label: 框架名称
+      placeholder: 例如 XXX-Yunzai
+    validations:
+      required: true
+
+  - type: input
+    id: framework-repo
+    attributes:
+      label: 框架仓库地址
+      description: 请提供可访问的仓库链接（GitHub / Gitee / GitCode / CNB 均可）
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ecosystem
+    attributes:
+      label: 所属生态
+      description: 用于初步判断能否复用现有适配层
+      options:
+        - 云崽系（Yunzai 分支，插件写法 class extends plugin）
+        - Karin 系
+        - 其他 Node.js 机器人框架
+        - 不确定
+    validations:
+      required: true
+
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: 与现有框架的兼容程度
+      description: 该框架能否直接加载上述六个框架的插件？
+      options:
+        - 完全兼容云崽系插件，改个目录名即可
+        - 部分兼容，需要少量改动
+        - 不兼容，需要新增独立适配层
+        - 不确定
+    validations:
+      required: true
+
+  - type: input
+    id: framework-version
+    attributes:
+      label: 框架版本 / 提交
+      placeholder: 例如 v1.0.0 或 commit 短哈希
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: 申请理由
+      description: 为什么希望支持这个框架？例如社区规模、你正在使用、官方推荐等
+    validations:
+      required: true
+
+  - type: textarea
+    id: differences
+    attributes:
+      label: 与现有框架的主要差异
+      description: 如已知，请说明插件加载方式、消息发送 API、命令与任务注册、配置与数据存储等方面的不同点
+    validations:
+      required: false
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: 参考实现
+      description: 该框架下其他插件的适配写法，或已适配该框架的同类项目链接
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 你能提供的帮助
+      options:
+        - label: 我可以提供运行环境并协助联调测试
+          required: false
+        - label: 我可以直接提交适配 PR
+          required: false
+        - label: 我可以整理该框架插件开发文档的要点
+          required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已确认该框架不在插件当前支持的六个框架列表中
+          required: true
+        - label: 我已搜索过现有 Issue，确认不是重复申请
+          required: true
