@@ -2,16 +2,31 @@ import fs from "node:fs"
 import path from "node:path"
 import YAML from "yaml"
 import { gameIds, getGameName } from "#GamePush.model"
-import { BotName, pluginName } from "#GamePush.components"
+import { pluginName, adapterId } from "#GamePush.components"
+import { onUnload } from "../lib/runtime/lifecycle.js"
+import { DEFAULT_CRON } from "../lib/runtime/define.js"
 
-// yunzai-ng 的数据目录约定是 data/plugin/<插件名>（即框架的 ctx.dataDir）
-const CONFIG_DIR = BotName === "Karin"
-  ? path.join(process.cwd(), "@karinjs/karin-plugin-gamepush/config")
-  : BotName === "Yunzai-NG"
-    ? path.join(process.cwd(), "data", "plugin", pluginName)
-    : path.join(process.cwd(), "data")
+/**
+ * 配置文件目录（与各框架适配器的 dataDir 保持一致）
+ *   - Karin     → <root>/@karinjs/<插件目录名>/config
+ *   - yunzai-ng → <root>/data/plugin/<插件名>（内核托管，仅旧配置迁移用）
+ *   - JiuLi     → <root>/data/plugins/<插件目录名>
+ *   - 其余云崽系 → <root>/data
+ */
+const CONFIG_DIR = (() => {
+  const root = process.cwd()
+  switch (adapterId) {
+    case "karin":
+      return path.join(root, "@karinjs", pluginName, "config")
+    case "yunzai-ng":
+      return path.join(root, "data", "plugin", pluginName)
+    case "jiuli":
+      return path.join(root, "data", "plugins", pluginName)
+    default:
+      return path.join(root, "data")
+  }
+})()
 const CONFIG_PATH = path.join(CONFIG_DIR, "GamePush-Plugin.yaml")
-const DEFAULT_CRON = "0 0/5 * * * *"
 
 // 本模块单例随 import 构造，早于 yunzai-ng 适配器补上 globalThis.logger。
 // 用惰性代理：取值时才解析全局 logger —— import 期(全局未就绪)回落 console 不报错，
@@ -37,7 +52,7 @@ class Config {
     // yunzai-ng 下配置交由内核 ctx.config 托管（WebUI 面板可视化编辑，落盘 config/<插件名>.yaml），
     // 不在此建 data/plugin 文件、也不起 fs 监听 —— 等插件 setup 里调用 bindYng 注入句柄。
     // 先用默认值占位，避免 setup 之前被读到 undefined。
-    if (BotName === "Yunzai-NG") {
+    if (adapterId === "yunzai-ng") {
       this.configCache = this.getDefaultConfig()
       return
     }
@@ -136,7 +151,7 @@ class Config {
       if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true })
       // 旧位置 data/GamePush-Plugin.yaml → 新位置：搬过去，避免丢已配置的推送群
       const legacyPath = path.join(process.cwd(), "data", "GamePush-Plugin.yaml")
-      if (BotName === "Yunzai-NG" && !fs.existsSync(CONFIG_PATH) && fs.existsSync(legacyPath)) {
+      if (adapterId === "yunzai-ng" && !fs.existsSync(CONFIG_PATH) && fs.existsSync(legacyPath)) {
         fs.copyFileSync(legacyPath, CONFIG_PATH)
       }
       if (!fs.existsSync(CONFIG_PATH)) this.saveConfig(this.getDefaultConfig())
@@ -256,6 +271,8 @@ class Config {
         logger.info(`[${pluginName}] 配置变更，重新加载`)
         this.loadConfig()
       })
+      // 热重载 / 卸载时释放，避免 JiuLi 每次重载多留一份 watcher
+      onUnload(() => this.watcher?.close())
     } catch (err) {
       logger.error(`[${pluginName}] 设置配置监视器失败`, err)
     }
@@ -310,7 +327,7 @@ class Config {
 
   /** 获取前端配置 */
   getFrontendConfig() {
-    if (BotName !== "Karin") return this.configCache
+    if (adapterId !== "karin") return this.configCache
 
     logger.debug("当前配置缓存:", JSON.stringify(this.configCache, null, 2))
     const frontendConfig = {}

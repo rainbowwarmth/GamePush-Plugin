@@ -1,25 +1,14 @@
-import karin from "node-karin"
-import { api, gameIds, getGameName } from "#GamePush.model"
-import { cfg } from "#GamePush.components"
+/**
+ * Karin 定时任务暴露点
+ *
+ * Karin 的 Plugin 不支持 task 字段，必须独立导出 `karin.task(...)`。
+ * 本文件只是薄壳：任务定义来自 model/tasks.js，翻译成 Karin 语法由兼容层完成。
+ */
+import { ensureInit } from "#GamePush.runtime"
+import { buildTaskExports } from "#GamePush.registry"
+import { buildAllTaskDefs } from "#GamePush.model/tasks"
+import { gameIds } from "#GamePush.model/util"
 
-const tasks = gameIds.map((gameId) => {
-  const name = `${getGameName(gameId)}版本监控`
-  const cron = cfg.getGameConfig(gameId)?.cron || "0 0/5 * * * *"
-  const logset = cfg.getGameConfig(gameId)?.log || false
-  logger.info(`[karin-plugin-gamepush] 创建定时任务: ${name} (cron: ${cron})`)
+await ensureInit()
 
-  return karin.task(
-    name,
-    cron,
-    async () => {
-      try {
-        api.autoCheck(gameId)
-      } catch (e) {
-        logger.error(`[karin-plugin-gamepush] ${name}定时任务执行错误:`, e)
-      }
-    },
-    { log: logset }
-  )
-})
-
-export const Task = tasks
+export const Task = buildTaskExports(buildAllTaskDefs(gameIds))

@@ -1,216 +1,49 @@
-import { cfg, request, pluginName } from "#GamePush.components"
-import { sendGroupMsg } from "#GamePush.lib"
+/**
+ * 版本检查编排
+ *
+ * 本模块**不含任何厂商差异** —— 「某游戏请求哪个接口、响应怎么解析」全部在 model/games.js。
+ * 这里只负责：拿到归一化的 { main, pre } → 与 Redis 里的旧值比对 → 触发推送 → 回写 Redis。
+ */
+import { cfg, pluginName } from "#GamePush.components"
 import { rt } from "#GamePush.runtime"
-import {
-  base,
-  notice,
-  getGameChuckAPI,
-  getGameName,
-  getRedisKeys,
-  GAME_CONFIG,
-  versionComparator
-} from "#GamePush.model"
+import { sendGroupMsg } from "#GamePush.lib"
+import { base, notice } from "#GamePush.model"
+import { GAME_CONFIG, getGameName, getRedisKeys, versionComparator, formatSize } from "./util.js"
+import { getGameAdapter } from "./games.js"
 
 class ApiTools extends base {
-  gameApis = new Map()
-
-  constructor() {
-    super()
-    Object.keys(GAME_CONFIG).forEach((game) => {
-      this.gameApis.set(game, getGameChuckAPI(game))
-    })
-  }
-
   /**
-   * 自动检查游戏版本
+   * 自动检查（定时任务入口）—— 失败只记日志，不向外抛
    * @param {string} game - 游戏ID
    */
   async autoCheck(game = "") {
     try {
-      const gameConfig = cfg.getGameConfig(game)
-      if (gameConfig.enable) {
-        await this.checkVersion(true, game)
-      }
+      if (!cfg.getGameConfig(game).enable) return
+      await this.checkVersion(game)
     } catch (err) {
-      logger.error(`[${pluginName}][${getGameName(game)}自动检查] 失败`, err)
+      rt.logger?.error(`[${pluginName}][${getGameName(game)}自动检查] 失败`, err)
     }
   }
 
   /**
-   * 检查游戏版本
-   * @param {boolean} auto - 是否自动检查
+   * 检查游戏版本（失败时抛错，由调用方决定怎么呈现）
    * @param {string} game - 游戏ID
    */
-  async checkVersion(auto = false, game = "") {
+  async checkVersion(game = "") {
     if (!game || !GAME_CONFIG[game]) {
       throw new Error(`[${pluginName}] 无效的游戏标识: ${game}`)
     }
-    try {
-      if (game === "zmd") {
-        await this.processHypergryphData(game, auto)
-      } else {
-        const apiUrl = this.gameApis.get(game)
-        const data = await request.get(apiUrl, {
-          responseType: "json",
-          log: true,
-          gameName: getGameName(game)
-        })
 
-        if (game === "ww") {
-          await this.processWWData(data, game, auto)
-        } else {
-          await this.processMHYData(data, game, auto)
-        }
-      }
-    } catch (err) {
-      logger.error(`[${pluginName}][${getGameName(game)}版本监控] 错误`, err)
-      if (!auto) this.reply(`[${pluginName}] ❌ 检查失败：${err.message}`)
-    }
+    const { main, pre } = await getGameAdapter(game).fetchVersion(game)
+
+    await this.processMainVersion(game, main)
+    await this.processPreDownload(game, pre)
   }
 
   /**
-   * 处理鸣潮游戏数据
-   * @param {Object} data - API返回数据
+   * 处理主版本：仅当新版本更大时推送并回写
    * @param {string} game - 游戏ID
-   * @param {boolean} auto - 是否自动检查
-   */
-  async processWWData(data, game, auto) {
-    const gameCheckData = data
-
-    await this.processMainVersion(game, gameCheckData.default?.config?.version, auto)
-
-    await this.processPreDownload(game, gameCheckData.predownload?.config, auto)
-  }
-
-  /**
-   * 处理米哈游游戏数据
-   * @param {Object} data - API返回数据
-   * @param {string} game - 游戏ID
-   * @param {boolean} auto - 是否自动检查
-   */
-  async processMHYData(data, game, auto) {
-    const gameCheckData = data?.data?.game_branches?.[0]
-    if (!gameCheckData) throw new Error(`[${pluginName}] ${getGameName(game)}游戏数据解析失败`)
-
-    await this.processMainVersion(game, gameCheckData.main?.tag, auto)
-
-    await this.processPreDownload(game, gameCheckData.pre_download, auto)
-  }
-
-  /**
-   * 处理鹰角游戏数据
-   * @param {string} game - 游戏ID
-   * @param {boolean} auto - 是否自动检查
-   */
-  async processHypergryphData(game, auto) {
-    const url = "https://launcher.hypergryph.com/api/proxy/batch_proxy"
-    const headers = {
-      Host: "launcher.hypergryph.com",
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-hg-launcher-device-id": "83a5d5ca-7f0e-4277-ba71-c9e66dafd7e4",
-      "x-hg-user-token": "",
-      Connection: "Keep-Alive",
-      "Accept-Language": "zh-CN,en,*",
-      "User-Agent": "Mozilla/5.0",
-      "Accept-Encoding": "gzip, deflate"
-    }
-
-    const makeBody = (version) => ({
-      proxy_reqs: [
-        {
-          kind: "get_latest_game",
-          get_latest_game_req: {
-            appcode: "6LL0KJuqHBVz33WK",
-            channel: "1",
-            sub_channel: "1",
-            version: version,
-            launcher_appcode: "abYeZZ16BPluCFyT",
-            launcher_sub_channel: "1",
-            disk_type: 0,
-            patch_encrypt: true
-          }
-        }
-      ]
-    })
-
-    // 第一步：空版本请求获取最新版本号
-    const emptyRes = await request.post(url, makeBody(""), {
-      headers,
-      responseType: "json",
-      log: true,
-      gameName: getGameName(game),
-      retry: 3,
-      retryDelay: 1000
-    })
-
-    if (!emptyRes?.proxy_rsps?.[0]?.get_latest_game_rsp) {
-      throw new Error(`[${pluginName}] ${getGameName(game)}版本数据获取失败`)
-    }
-
-    const latestVersion = emptyRes.proxy_rsps[0].get_latest_game_rsp.version
-    if (!latestVersion) throw new Error(`[${pluginName}] ${getGameName(game)}未获取到版本号`)
-
-    // 第二步：用本地旧版本请求，获取 patch 差分增量包 + pkg 完整包
-    const { main: redisKey } = getRedisKeys(game)
-    const oldVer = (await rt.kv.get(redisKey)) || ""
-
-    const versionRes = await request.post(url, makeBody(oldVer), {
-      headers,
-      responseType: "json",
-      log: true,
-      gameName: getGameName(game),
-      retry: 3,
-      retryDelay: 1000
-    })
-
-    const gameRsp = versionRes?.proxy_rsps?.[0]?.get_latest_game_rsp
-    if (!gameRsp) throw new Error(`[${pluginName}] ${getGameName(game)}版本数据解析失败`)
-
-    // 处理主版本
-    await this.processMainVersion(game, latestVersion, auto)
-
-    // 处理预下载数据（pre_patch）
-    await this.processHypergryphPreDownload(game, gameRsp.pre_patch, latestVersion, auto)
-  }
-
-  /**
-   * 处理鹰角预下载信息
-   * @param {string} game - 游戏ID
-   * @param {Object} prePatch - 预下载补丁数据
-   * @param {string} currentVersion - 当前版本
-   */
-  async processHypergryphPreDownload(game, prePatch, currentVersion, auto) {
-    const { pre: preKey } = getRedisKeys(game)
-    const storedPre = await rt.kv.get(preKey)
-
-    if (prePatch?.version) {
-      const preVersion = prePatch.version
-      if (preVersion !== storedPre) {
-        await rt.kv.set(preKey, preVersion)
-        notice.pushNotify({
-          type: "pre",
-          game,
-          newVersion: preVersion,
-          oldVersion: storedPre,
-          pushChangeType: cfg.getGameConfig(game).pushChangeType
-        })
-      }
-    } else if (storedPre) {
-      await rt.kv.del(preKey)
-      notice.pushNotify({
-        type: "pre-remove",
-        game,
-        oldVersion: storedPre,
-        pushChangeType: cfg.getGameConfig(game).pushChangeType
-      })
-    }
-  }
-
-  /**
-   * 处理主版本信息
-   * @param {string} game - 游戏ID
-   * @param {string} currentVersion - 当前版本
+   * @param {string|undefined} currentVersion - 接口返回的当前版本
    */
   async processMainVersion(game, currentVersion) {
     if (!currentVersion) return
@@ -231,75 +64,65 @@ class ApiTools extends base {
   }
 
   /**
-   * 处理预下载信息
+   * 处理预下载：有则更新、无则撤销（撤销即「预下载已关闭」通知）
+   *
+   * 三个厂商的预下载版本号字段各不相同，但已在 games.js 归一化成同一个字符串，
+   * 故这里不再需要 `game === "ww"` 之类的分支。
    * @param {string} game - 游戏ID
-   * @param {Object} preData - 预下载数据
+   * @param {string|undefined} currentPre - 接口返回的预下载版本
    */
-  async processPreDownload(game, preData) {
+  async processPreDownload(game, currentPre) {
     const { pre: preKey } = getRedisKeys(game)
-    const currentPre = game === "ww" ? preData?.version : preData?.tag
     const storedPre = await rt.kv.get(preKey)
 
     if (currentPre) {
-      if (currentPre !== storedPre) {
-        await rt.kv.set(preKey, currentPre)
-        notice.pushNotify({
-          type: "pre",
-          game,
-          newVersion: currentPre,
-          oldVersion: storedPre,
-          pushChangeType: cfg.getGameConfig(game).pushChangeType
-        })
-      }
-    } else if (storedPre) {
-      await rt.kv.del(preKey)
-      notice.pushNotify({
-        type: "pre-remove",
+      if (currentPre === storedPre) return
+      await rt.kv.set(preKey, currentPre)
+      await notice.pushNotify({
+        type: "pre",
         game,
+        newVersion: currentPre,
         oldVersion: storedPre,
         pushChangeType: cfg.getGameConfig(game).pushChangeType
       })
+      return
     }
+
+    if (!storedPre) return
+    await rt.kv.del(preKey)
+    await notice.pushNotify({
+      type: "pre-remove",
+      game,
+      oldVersion: storedPre,
+      pushChangeType: cfg.getGameConfig(game).pushChangeType
+    })
   }
 
   /**
    * 向群组发送消息
-   * @param {string} msg - 消息内容
+   * @param {any} msg - 消息内容
    * @param {string} game - 游戏ID
    * @param {Object} gameConfig - 游戏配置
    * @param {string} pushChangeType - 消息类型
    */
-  sendToGroups(msg, game, gameConfig, pushChangeType, html) {
+  sendToGroups(msg, game, gameConfig, pushChangeType) {
     if (!gameConfig?.pushGroups?.length) {
-      logger.debug(`[${pluginName}][${getGameName(game)}] 未配置推送群组`)
+      rt.logger?.debug(`[${pluginName}][${getGameName(game)}] 未配置推送群组`)
       return
     }
     for (const pushItem of gameConfig.pushGroups) {
-      let botId, groupId
-      if (typeof pushItem === "object") {
-        botId = pushItem.botId
-        groupId = pushItem.groupId
-      }
-      sendGroupMsg(botId, groupId, msg, pushChangeType)
+      if (typeof pushItem !== "object" || !pushItem) continue
+      sendGroupMsg(pushItem.botId, pushItem.groupId, msg, pushChangeType)
     }
   }
 
   /**
-   * 格式化文件大小
-   * @param {number} bytes - 字节数
+   * 格式化文件大小（保留在实例上以兼容既有 `api.formatSize(...)` 调用）
+   * @param {number|string} bytes - 字节数
    * @returns {string} 格式化后的大小
    */
   formatSize(bytes) {
-    const units = ["B", "KB", "MB", "GB", "TB"]
-    let size = Number(bytes)
-    let unitIndex = 0
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024
-      unitIndex++
-    }
-
-    return `${size.toFixed(2)} ${units[unitIndex]}`
+    return formatSize(bytes)
   }
 }
 

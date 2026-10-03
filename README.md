@@ -3,16 +3,16 @@
 <div align="center">
 
 ![GamePush](https://img.shields.io/badge/GamePush-Plugin-blue?style=for-the-badge&logo=gamepad)
+![Yunzai](https://img.shields.io/badge/Yunzai-green?style=for-the-badge&logo=robot)
+![JiuLi](https://img.shields.io/badge/JiuLi-green?style=for-the-badge&logo=robot)
 ![Karin](https://img.shields.io/badge/Karin-Bot-green?style=for-the-badge&logo=robot)
-![Miao-Yunzai](https://img.shields.io/badge/Miao-Yunzai-green?style=for-the-badge&logo=robot)
-![TRSS-Yunzai](https://img.shields.io/badge/TRSS-Yunzai-green?style=for-the-badge&logo=robot)
-![Yunzai-NG](https://img.shields.io/badge/Yunzai-NG-green?style=for-the-badge&logo=robot)
+![Yunzai-NG](https://img.shields.io/badge/Yunzai--NG-green?style=for-the-badge&logo=robot)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
-![Node.js](https://img.shields.io/badge/Node.js-22.13+-brightgreen?style=for-the-badge&logo=node.js)
+![Node.js](https://img.shields.io/badge/Node.js-22.15+-brightgreen?style=for-the-badge&logo=node.js)
 
 **🚀 游戏版本监控推送插件**
 
-_实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏平台_
+_实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏平台 | 一套代码适配六框架_
 
 </div>
 
@@ -39,8 +39,9 @@ _实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏�
 - ⚙️ **灵活配置** - 每个游戏独立配置推送开关、频率与推送群
 - 🕐 **定时任务** - 自动定时检查更新
 - 💾 **混合存储** - Redis 保存当前版本状态，内置 SQLite 保存历史版本数据
-- 🎛️ **多端可视化配置** - Guoba、Karin-Web、Yunzai-NG 配置界面
+- 🎛️ **多端可视化配置** - Guoba、Karin-Web、Yunzai-NG 三套配置界面
 - 🔘 **快捷按钮** - `当前版本` 回复自动附带命令按钮
+- 🧩 **六框架同源** - Miao-Yunzai / TRSS-Yunzai / MangoCat-Yunzai / JiuLi / Karin / Yunzai-NG 共用一套业务代码，框架差异全部收敛在 `lib/runtime/`
 
 ---
 
@@ -48,8 +49,8 @@ _实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏�
 
 ### 前置要求
 
-- ✅ 任选其一：[Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai)、[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)、[Karin](https://github.com/KarinJS/Karin)、[Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng)
-- ✅ [nodejs 22.13+](https://nodejs.org/zh-cn/download)（依赖内置 `node:sqlite`）
+- ✅ 任选其一：[Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai)、[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)、[MangoCat-Yunzai](https://github.com/MangoCat-Yunzai/MangoCat-Yunzai)、[JiuLi（玖璃）](https://github.com/jiuli-framework/jiuli)、[Karin](https://github.com/KarinJS/Karin)、[Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng)
+- ✅ [Node.js 22.15+](https://nodejs.org/zh-cn/download)（依赖内置 `node:sqlite`，无需编译 `better-sqlite3`）
 - ✅ [Redis 数据库](https://redis.io/)（Yunzai-NG 下由内核提供 KV，无需单独部署）
 
 ### 安装步骤
@@ -57,29 +58,28 @@ _实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏�
 1. **克隆插件**
 
 ```bash
-# 使用 Miao-Yunzai、TRSS-Yunzai 和 Yunzai-NG
-## 使用GitCode
+# Miao-Yunzai / TRSS-Yunzai / MangoCat-Yunzai / JiuLi / Yunzai-NG —— 目录名保持 GamePush-Plugin
+## GitCode
 git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin.git ./plugins/GamePush-Plugin
-## 使用Gitee
+## Gitee
 git clone https://gitee.com/rainbowwarmth/GamePush-Plugin.git ./plugins/GamePush-Plugin
-## 使用CNB
+## CNB
 git clone https://cnb.cool/rainbowwarmth/GamePush-Plugin.git ./plugins/GamePush-Plugin
-## 使用GitHub
+## GitHub
 git clone https://github.com/rainbowwarmth/GamePush-Plugin.git ./plugins/GamePush-Plugin
 
-# 使用 Karin
-## 使用GitCode
+# Karin —— 目录名必须包含 karin
+## GitCode
 git clone https://gitcode.com/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-plugin-gamepush
-## 使用Gitee
+## Gitee
 git clone https://gitee.com/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-plugin-gamepush
-## 使用CNB
+## CNB
 git clone https://cnb.cool/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-plugin-gamepush
-## 使用GitHub
+## GitHub
 git clone https://github.com/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-plugin-gamepush
-
 ```
 
-> ⚠️ 插件依靠**目录名**识别 Karin：目录名包含 `karin` 时按 Karin 加载，否则按宿主 `package.json` 的 `name` 区分 Miao-Yunzai / TRSS-Yunzai / Yunzai-NG。请勿随意改名。
+> ⚠️ **目录名决定框架判定**：目录名包含 `karin` → 按 Karin 加载；否则按宿主 `package.json` 的 `name` 区分 `miao-yunzai` / `trss-yunzai` / `MangoCat-Yunzai` / `jiuli` / `yunzai-ng`。请勿随意改名。
 
 2. **安装依赖**
 
@@ -87,12 +87,12 @@ git clone https://github.com/rainbowwarmth/GamePush-Plugin.git ./plugins/karin-p
 pnpm install -P
 ```
 
-> 💡 Yunzai-NG 依赖 `@yunzai-ng/core`（已声明为 optionalDependencies，正常安装即会引入）。
+> 💡 `@yunzai-ng/core` **不需要**在插件里安装 —— 它由 Yunzai-NG 内核提供，插件从宿主 `node_modules` 解析。仅在 NG 下才会被导入，其余框架不会触碰该依赖。
 
 3. **启动机器人**
 
 ```bash
-# 重启 Miao-Yunzai / TRSS-Yunzai / Karin / Yunzai-NG 即可自动加载插件
+# 重启对应的机器人框架即可自动加载插件
 ```
 
 首次加载时插件会自动从远端拉取游戏版本数据库（`GamePush-Plugin.db`），并在后续启动时按版本号增量更新。
@@ -147,13 +147,14 @@ pnpm install -P
 
 插件采用混合存储：**当前版本状态**存放在 Redis / 内核 KV，**历史版本包体数据**存放在内置 SQLite（`node:sqlite`，无需安装 `better-sqlite3`）。
 
-数据库文件名固定为 `GamePush-Plugin.db`，存放目录随框架而变：
+数据库文件名**恒为** `GamePush-Plugin.db`（取插件 `package.json` 的 `name`，不随目录名变化），存放目录随框架而变：
 
-| 框架                     | 数据库路径                                            |
-| ------------------------ | ----------------------------------------------------- |
-| Miao-Yunzai / TRSS-Yunzai | `data/GamePush-Plugin.db`                             |
-| Karin                    | `@karinjs/karin-plugin-gamepush/data/GamePush-Plugin.db` |
-| Yunzai-NG                | `data/plugin/GamePush-Plugin/sql/GamePush-Plugin.db`  |
+| 框架                       | 数据库路径                                               |
+| -------------------------- | -------------------------------------------------------- |
+| Miao-Yunzai / TRSS-Yunzai / MangoCat-Yunzai | `data/GamePush-Plugin.db`                |
+| JiuLi                      | `data/plugins/GamePush-Plugin/GamePush-Plugin.db`         |
+| Karin                      | `@karinjs/karin-plugin-gamepush/data/GamePush-Plugin.db` |
+| Yunzai-NG                  | `data/plugin/GamePush-Plugin/sql/GamePush-Plugin.db`     |
 
 - 首次启动时会从远程拉取版本历史数据作为初始数据，失败仅告警并回退到本地库。
 - `#更新游戏版本数据` 采用 **`INSERT OR IGNORE` 合并**而非覆盖，本地记录不会丢失。
@@ -165,28 +166,29 @@ pnpm install -P
 
 ### 配置文件位置
 
-| 框架                        | 配置文件                                                    |
-| --------------------------- | ----------------------------------------------------------- |
-| Miao-Yunzai / TRSS-Yunzai   | `data/GamePush-Plugin.yaml`                                 |
-| Karin                       | `@karinjs/karin-plugin-gamepush/config/GamePush-Plugin.yaml` |
-| Yunzai-NG                   | `config/GamePush-Plugin.yaml`（由内核托管，面板可视化编辑） |
-
-### 配置项
+| 框架                                          | 配置文件                                                     |
+| --------------------------------------------- | ------------------------------------------------------------ |
+| Miao-Yunzai / TRSS-Yunzai / MangoCat-Yunzai   | `data/GamePush-Plugin.yaml`                                   |
+| JiuLi                                         | `data/plugins/GamePush-Plugin/GamePush-Plugin.yaml`           |
+| Karin                                         | `@karinjs/karin-plugin-gamepush/config/GamePush-Plugin.yaml`  |
+| Yunzai-NG                                     | `config/GamePush-Plugin.yaml`（由内核托管，面板可视化编辑）   |
 
 ### 可视化配置
 
-插件支持三套可视化配置界面，可按框架选用：
+插件支持三套可视化配置界面，按框架自动选用：
 
-| 框架                      | 配置方式                        |
-| ------------------------- | ------------------------------- |
-| Miao-Yunzai / TRSS-Yunzai | [Guoba-Plugin](https://github.com/guoba-yunzai/guoba-plugin) |
-| Karin                     | Karin-Web（`web.config.js`）    |
-| Yunzai-NG                 | 内核配置界面（`model/plugin.js` 中的 schema） |
+| 框架                                          | 配置方式                                                       |
+| --------------------------------------------- | -------------------------------------------------------------- |
+| Miao-Yunzai / TRSS-Yunzai / MangoCat-Yunzai / JiuLi | [Guoba-Plugin](https://github.com/guoba-yunzai/guoba-plugin)（`guoba.support.js`） |
+| Karin                                         | Karin-Web（`web.config.js`）                                   |
+| Yunzai-NG                                     | 内核配置界面（schema 由 `lib/runtime/panels/yunzai-ng.js` 生成） |
+
+> 📌 三个根文件（`guoba.support.js` / `web.config.js` / NG 的 `configSchema`）都只是**薄暴露**，真正的 schema 与面板实现统一下放在兼容层 `lib/runtime/panels/`。
 
 可配置项：
 
 - 🎛️ 推送开关 / 日志开关
-- ⏰ 定时任务 cron 表达式
+- ⏰ 定时任务 cron 表达式（默认 `0 */5 3-22 * * ?` —— 每天 3:00–22:55 每 5 分钟一次）
 - 👥 推送的「机器人 + 群」列表
 - 🖼️ 消息类型（图片 / 文字）与 html 模板（默认 / 简约）
 
@@ -196,33 +198,54 @@ pnpm install -P
 
 ```
 GamePush-Plugin/
-├── 📁 apps/               # 功能模块（Yunzai / Karin）
-│   ├── 🎮 ys.js           # 原神功能
-│   ├── ⭐ sr.js           # 星铁功能
-│   ├── 🔥 zzz.js          # 绝区零功能
-│   ├── ⚡ bh3.js          # 崩坏3功能
-│   ├── 🌊 ww.js           # 鸣潮功能
-│   ├── 🏜️ zmd.js          # 终末地功能
-│   ├── ⚙️ set.js          # 设置管理
-│   └── 📋 task.js         # 定时任务
-├── 📁 components/         # 组件模块（路径、配置、请求）
-├── 📁 lib/                # 工具库
-│   └── 📁 runtime/        # 框架兼容层
-│       ├── index.js       # 运行时选择与统一接口
-│       ├── yunzai.js      # Miao/TRSS-Yunzai 适配
-│       ├── karin.js       # Karin 适配
-│       ├── yunzai-ng.js   # Yunzai-NG 适配
-│       ├── sqlite-db.js   # node:sqlite 历史数据存储
-│       ├── buttons.js     # 命令按钮构建
-│       └── compat.js      # 旧版导入兼容垫片
-├── 📁 model/              # 数据模型与命令实现
-│   ├── commands.js        # 命令定义
-│   └── plugin.js          # Yunzai-NG 插件定义
-├── 📁 resources/          # 资源文件
-├── 🔧 index.js            # 入口文件
-├── 🎛️ guoba.support.js    # Guoba支持
-├── 🎛️ web.config.js       # Karin-Web 支持
-└── 📦 package.json        # 项目配置
+├── 📁 apps/                    # 插件类集合（云崽系 loader 展开 apps 字段；Karin 递归加载本目录）
+│   ├── 🎮 games.js             # 6 个游戏插件类（ys/sr/zzz/bh3/ww/zmd，逐个具名导出）
+│   ├── ⚙️ set.js               # 设置管理
+│   └── 📋 task.js              # 独立定时任务（Karin 用薄壳）
+├── 📁 components/              # 组件模块（路径、配置、请求）
+├── 📁 lib/                     # 工具库
+│   ├── api.js / common.js / plugin.js / puppeteer.js / redis.js / segment.js
+│   │                           # 兼容垫片：转发到 rt，业务侧仍按旧路径导入
+│   └── 📁 runtime/             # ★ 框架兼容层（六框架差异全部收敛在此）
+│       ├── index.js            # 运行时单例 rt + 适配器装配
+│       ├── detect.js           # 框架探测（目录名 / 宿主 package.json）
+│       ├── contract.js         # 适配器契约校验
+│       ├── define.js           # 插件自有 DSL：defineCommand / defineTask / defineApp
+│       ├── lifecycle.js        # 卸载钩子与资源交接（JiuLi 热重载）
+│       ├── sqlite-db.js        # node:sqlite 历史数据存储
+│       ├── buttons.js          # 各框架按钮结构互转
+│       ├── 📁 adapters/        # 六个适配器
+│       │   ├── yunzai-base.js  # 云崽系基座（Miao/TRSS/MangoCat/JiuLi 复用）
+│       │   ├── yunzai.js       # Miao-Yunzai / TRSS-Yunzai
+│       │   ├── mangocat.js     # MangoCat-Yunzai
+│       │   ├── jiuli.js        # JiuLi（玖璃）
+│       │   ├── karin.js        # Karin
+│       │   └── yunzai-ng.js    # Yunzai-NG
+│       ├── 📁 panels/          # 前端配置面板（schema 与渲染器）
+│       │   ├── schema.js       # 框架无关的统一 schema
+│       │   ├── guoba.js        # Guoba 渲染
+│       │   ├── karin-web.js    # Karin-Web 渲染
+│       │   └── yunzai-ng.js    # Yunzai-NG 渲染
+│       └── 📁 registry/        # 注册层：把 app 定义翻译成各框架的注册语法
+│           ├── app-base.js     # 插件基类（继承宿主 Base + 绑定命令 handler）
+│           ├── apps.js         # prepareApp（云崽系 / Karin）
+│           ├── ng.js           # definePlugin（Yunzai-NG）
+│           └── tasks.js        # 独立任务导出（Karin）
+├── 📁 model/                   # 数据模型与命令实现（框架无关）
+│   ├── games.js                # ★ 各游戏接口描述符：端点 / 请求方式 / 响应归一化
+│   ├── util.js                 # 游戏元数据与纯工具（无网络、无兼容层依赖）
+│   ├── api.js                  # 版本检查编排（比对 Redis → 触发推送）
+│   ├── notice.js               # 推送编排（文案模板 / 图片 / 文本）
+│   ├── download.js             # 下载数据编排（带缓存）+ 文案格式化
+│   ├── base.js                 # 截图数据组装、图标内联
+│   ├── commands.js             # 命令定义
+│   ├── tasks.js                # 定时任务定义
+│   └── index.js                # 模型层出口
+├── 📁 resources/               # 资源文件
+├── 🔧 index.js                 # 入口：按框架分发到注册层
+├── 🎛️ guoba.support.js         # Guoba 暴露点（薄壳，转发兼容层）
+├── 🎛️ web.config.js            # Karin-Web 暴露点（薄壳，转发兼容层）
+└── 📦 package.json             # 项目配置（含 #GamePush.* 子路径导入映射）
 ```
 
 ---
@@ -231,19 +254,40 @@ GamePush-Plugin/
 
 ### 技术栈
 
-- **框架**: [Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai) 、 [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai) 、[Karin](https://github.com/KarinJS/Karin) 、[Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng)
-- **语言**: JavaScript (ES6+)
+- **框架**: [Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai)、[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)、[MangoCat-Yunzai](https://github.com/MangoCat-Yunzai/MangoCat-Yunzai)、[JiuLi（玖璃）](https://github.com/jiuli-framework/jiuli)、[Karin](https://github.com/KarinJS/Karin)、[Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng)
+- **语言**: JavaScript (ES6+ / ESM)
 - **数据库**: [Redis](https://redis.io/)（版本状态）+ Node 内置 `node:sqlite`（版本历史，无需安装 `better-sqlite3`）
 - **任务调度**: Cron
-- **配置管理**: Guoba 、Karin-Web 、Yunzai-NG schema
+- **配置管理**: Guoba / Karin-Web / Yunzai-NG schema（统一 schema，多渲染器）
 
 ### 兼容层设计
 
 所有框架差异收敛在 `lib/runtime/`，业务代码只依赖统一的 `rt` 对象：
 
-- 通过插件目录名与宿主 `package.json` 的 `name` 识别框架，加载对应适配器
-- 适配器统一提供 `logger`、`kv`、`db`、`http`、`config`、`render`、`sendGroupMsg`、`makeForward`、`normalizeEvent`、`segment`、`commandButtons` 等接口
-- 新增框架只需补一个适配器文件，无需改动 `apps/` 与 `model/` 业务逻辑
+- **框架探测**（`detect.js`）——按有序规则表识别：目录名含 `karin` → Karin；否则按宿主 `package.json` 的 `name` 匹配 `yunzai-ng` / `MangoCat-Yunzai` / `jiuli` / `miao-yunzai` / `trss-yunzai`；全部落空但存在云崽全局时按未知云崽分支告警处理。
+- **适配器契约**（`contract.js`）——适配器必须提供 `kv`、`db`、`dataDir`、`pluginRoot`、`segment`、`sendGroupMsg`、`makeForward`、`render`、`normalizeEvent`、`commandButtons`、`capabilities` 等接口，缺一即启动报错。
+- **插件自有 DSL**（`define.js`）——业务侧用 `defineCommand` / `defineTask` / `defineApp` 声明「有哪些命令、什么频率」，不写 `rule:` / `ctx.command` / `karin.task`。
+- **注册层**（`registry/`）——把 app 定义翻译成各框架的注册语法：云崽系 / Karin 走 `prepareApp` 生成插件类选项，Yunzai-NG 走 `definePlugin` + `ctx.command` / `ctx.cron`。
+- **面板兼容层**（`panels/`）——一份框架无关的 `schema.js`，加 Guoba / Karin-Web / Yunzai-NG 三个渲染器；根目录的 `guoba.support.js`、`web.config.js` 只是框架要求的固定暴露路径，内容转发到兼容层。
+- **生命周期**（`lifecycle.js`）——统一登记模块级资源（SQLite 句柄、chokidar watcher），并在 JiuLi 热重载时通过 `globalThis` 交接旧模块图的资源，避免句柄泄漏。
+
+> ➕ **新增框架**：在 `lib/runtime/adapters/` 补一个适配器文件 + 在 `detect.js` 规则表加一条匹配规则即可，`apps/` 与 `model/` 业务逻辑零改动。
+
+### 模型层分层
+
+业务侧按「游戏」而不是「接口」来组织 —— 厂商差异全部收敛在 `model/games.js`：
+
+- **`games.js`（接口描述符）** —— 一个游戏一处，对外只暴露四个归一化能力：
+  `fetchVersion(game)` → `{ main, pre }`、`fetchPackages(game, type)` → `{ data, patch }`、
+  `fetchSize(game, type)` → `{ formattedTotalSize, incrementalSize, Ver }`、`icon(game)`。
+  三个厂商（米哈游 `mhy` / 库洛 `ww` / 鹰角 `zmd`）各一个描述符，由 `GAME_CONFIG[game].api` 路由。
+- **`api.js` / `download.js` / `notice.js`（编排层）** —— 只做「取归一化数据 → 比对 → 推送 → 回写」，
+  不再出现 `if (game === "zmd")` 这类分支。
+- **`util.js`（叶子层）** —— 只有静态元数据与纯函数（`formatSize`、`versionComparator` 等），
+  不依赖兼容层、不发请求，避免与 `components/config.js` 形成循环。
+
+> ➕ **新增游戏**：在 `GAME_CONFIG` 加一条元数据、在 `games.js` 加一个描述符（若属已有厂商则直接复用），
+> 编排层无需改动。
 
 ### 核心特性
 
@@ -289,6 +333,8 @@ GamePush-Plugin/
 
 - [Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai) - 强大的机器人框架
 - [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai) - 强大的机器人框架
+- [MangoCat-Yunzai](https://github.com/MangoCat-Yunzai/MangoCat-Yunzai) - 内置 OneBotv11 适配器的云崽分支
+- [JiuLi（玖璃）](https://gitee.com/fox-glaze/jiuli) - 兼容 TRSS 生态的 TS 内核框架
 - [Karin](https://github.com/KarinJS/Karin) - 强大的机器人框架
 - [Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng) - 可插拔运行时内核
 - [Guoba-Plugin](https://github.com/guoba-yunzai/guoba-plugin) - 可视化配置支持

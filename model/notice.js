@@ -1,16 +1,15 @@
+/**
+ * 推送编排
+ *
+ * 推送渠道与文案在这里；「各游戏体积怎么算」在 model/games.js 的 fetchSize。
+ * 重构前 fetchSizeInfo 内部有 4 个按游戏分叉的分支（zmd / ww / ys·sr·zzz / bh3），
+ * 还自己重拼了一遍 branches 与 build 接口的 URL。
+ */
 import { puppeteer } from "#GamePush.lib"
-import { cfg, request, pluginName } from "#GamePush.components"
+import { cfg, pluginName } from "#GamePush.components"
 import { rt } from "#GamePush.runtime"
-import {
-  api,
-  base,
-  download,
-  getGameChuckAPI,
-  getPatchBuildAPI,
-  getBuildAPI,
-  getGameName,
-  getRedisKeys
-} from "#GamePush.model"
+import { api, base, getGameName } from "#GamePush.model"
+import { getGameAdapter } from "./games.js"
 
 class Notifier extends base {
   TemplateMap = {
@@ -19,9 +18,11 @@ class Notifier extends base {
         `✨${gameName}游戏版本更新通知`,
         `🚀版本变更：${oldVersion} → ${newVersion}`,
         formattedTotalSize && `📦完整大小（含中文语音）：${formattedTotalSize}`,
-        incrementalSize && `🔄 增量更新大小：约${incrementalSize}`,
+        incrementalSize && `🔄增量更新大小：约${incrementalSize}`,
         "📢 请及时更新客户端",
-        ...(gameName !== "原神" && gameName !== "崩坏3" ? [`💾 发送【#${gameName}获取下载链接】获取客户端`] : [])
+        ...(gameName !== "原神" && gameName !== "崩坏3"
+          ? [`💾 发送【#${gameName}获取下载链接】获取客户端`]
+          : [])
       ]
         .filter(Boolean)
         .join("\n"),
@@ -31,9 +32,11 @@ class Notifier extends base {
         `🎁${gameName}预下载资源已开放`,
         `📦新版本：${newVersion}`,
         formattedTotalSize && `📦完整大小（含中文语音）：${formattedTotalSize}`,
-        incrementalSize && `🔄 增量更新大小：约${incrementalSize}`,
+        incrementalSize && `🔄增量更新大小：约${incrementalSize}`,
         "📥请提前下载游戏资源",
-        ...(gameName !== "原神" && gameName !== "崩坏3" ? [`💾 发送【#${gameName}获取下载链接】获取客户端`] : [])
+        ...(gameName !== "原神" && gameName !== "崩坏3"
+          ? [`💾 发送【#${gameName}获取下载链接】获取客户端`]
+          : [])
       ]
         .filter(Boolean)
         .join("\n"),
@@ -44,41 +47,26 @@ class Notifier extends base {
 
   /**
    * 推送通知
-   * @param {string} type - 推送类型
-   * @param {string} game - 游戏ID
-   * @param {string} newVersion - 新版本号
-   * @param {string} oldVersion - 旧版本号
-   * @param {string} pushChangeType - 消息类型
+   * @param {Object} payload
+   * @param {string} payload.type - 推送类型（main | pre | pre-remove）
+   * @param {string} payload.game - 游戏ID
+   * @param {string} [payload.newVersion] - 新版本号
+   * @param {string} [payload.oldVersion] - 旧版本号
+   * @param {string} [payload.pushChangeType] - 消息类型（1 图片 / 2 文本）
    */
-  async pushNotify({ type, game, newVersion, oldVersion, pushChangeType, html }) {
+  async pushNotify({ type, game, newVersion, oldVersion, pushChangeType }) {
+    const gameName = getGameName(game)
     try {
+      // 首次运行（库里没有旧版本）不推送、也不记历史，否则会拿一个假版本污染数据
       if (oldVersion === "0.0.0") {
-        logger.debug(`[${pluginName}] 初始版本0.0.0，不推送通知且不更新数据库`)
+        rt.logger?.debug(`[${pluginName}] 初始版本0.0.0，不推送通知且不更新数据库`)
         return
       }
 
       const gameConfig = cfg.getGameConfig(game)
-      const gameName = getGameName(game)
-      const { formattedTotalSize, incrementalSize, Ver } = await this.fetchSizeInfo(
-        game,
-        type,
-        gameName
-      )
-      switch (type) {
-        case "main":
-          await rt.db.storeMainSizeData(game, newVersion, formattedTotalSize)
-          break
-        case "pre":
-          if (Ver) {
-            await rt.db.storePreSizeData(game, newVersion, Ver, incrementalSize)
-          }
-          break
-        case "pre-remove":
-          logger.debug(`⛔ 预下载关闭通知，不存储大小数据`)
-          break
-        default:
-          logger.warn(`⚠️ 未知通知类型: ${type}`)
-      }
+      const { formattedTotalSize, incrementalSize, Ver } = await this.fetchSizeInfo(game, type)
+
+      await this.storeSizeData(game, type, { newVersion, Ver, formattedTotalSize, incrementalSize })
 
       if (type === "pre-remove") return
 
@@ -104,123 +92,50 @@ class Notifier extends base {
         await this.sendTextMessage(type, game, gameConfig, templateData, pushChangeType)
       }
     } catch (err) {
-      logger.error(`[${pluginName}][${getGameName(game)}通知] 推送通知失败: ${err.message}`, err)
+      rt.logger?.error(`[${pluginName}][${gameName}通知] 推送通知失败: ${err.message}`, err)
     }
   }
 
   /**
-   * 获取大小信息
+   * 记录体积数据到历史库
    * @param {string} game - 游戏ID
    * @param {string} type - 推送类型
-   * @param {string} gameName - 游戏名称
+   * @param {Object} size - fetchSizeInfo 的结果
    */
-  async fetchSizeInfo(game, type, gameName) {
-    const excludedLanguages = ["en-us", "ja-jp", "ko-kr"]
-    let formattedTotalSize, incrementalSize, Ver
-    let buildSize = 0
-    let patchSize = 0
-
-    // 鹰角游戏必须使用 POST 请求
-    if (game === "zmd") {
-      const { data, patch } = await download.getDownloadData(game, type)
-      if (data?.total_size) {
-        formattedTotalSize = api.formatSize(Number(data.total_size))
-      } else if (data?.game_pkgs?.length) {
-        const totalSize = data.game_pkgs.reduce((sum, pkg) => sum + Number(pkg.size || 0), 0)
-        formattedTotalSize = api.formatSize(totalSize)
-      } else {
-        logger.debug(`[${pluginName}][${gameName}] 未获取到完整包大小`)
-      }
-
-      if (patch?.total_size) {
-        incrementalSize = api.formatSize(Number(patch.total_size))
-      } else if (patch?.game_pkgs?.length) {
-        const patchTotal = patch.game_pkgs.reduce((sum, pkg) => sum + Number(pkg.size || 0), 0)
-        incrementalSize = api.formatSize(patchTotal)
-      } else {
-        logger.debug(`[${pluginName}][${gameName}] 未获取到增量包大小`)
-      }
-
-      const mainKey = getRedisKeys(game).main
-      Ver = (await rt.kv.get(mainKey)) || ""
-      return { formattedTotalSize, incrementalSize, Ver }
+  async storeSizeData(game, type, { newVersion, Ver, formattedTotalSize, incrementalSize }) {
+    switch (type) {
+      case "main":
+        await rt.db.storeMainSizeData(game, newVersion, formattedTotalSize)
+        break
+      case "pre":
+        if (Ver) await rt.db.storePreSizeData(game, newVersion, Ver, incrementalSize)
+        break
+      case "pre-remove":
+        rt.logger?.debug("⛔ 预下载关闭通知，不存储大小数据")
+        break
+      default:
+        rt.logger?.warn(`⚠️ 未知通知类型: ${type}`)
     }
-
-    const BranchesData = await request.get(getGameChuckAPI(game), {
-      responseType: "json",
-      log: true,
-      gameName
-    })
-
-    const parseManifests = (manifests, version) =>
-      manifests
-        .filter((m) => !excludedLanguages.includes(m.matching_field?.toLowerCase()))
-        .reduce(
-          (sum, m) =>
-            sum +
-            parseInt(
-              m?.deduplicated_stats?.uncompressed_size ||
-                m?.stats?.[version]?.uncompressed_size ||
-                "0",
-              10
-            ),
-          0
-        )
-
-    if (game === "ww") {
-      const d = await download.getDownloadData(game, type)
-      formattedTotalSize = api.formatSize(d.data.game_pkgs[0].size)
-      incrementalSize = api.formatSize(d.patch.game_pkgs[0].size)
-      Ver = d.patch.game_pkgs[0].version
-    } else if (["ys", "sr", "zzz"].includes(game)) {
-      const branch = BranchesData?.data?.game_branches?.[0]
-      const section = type === "pre" ? branch?.pre_download : branch?.main
-      Ver = section?.diff_tags?.[0]
-
-      const buildData = await request.get(
-        getBuildAPI(type, section?.package_id, section?.password),
-        { responseType: "json", log: true, gameName }
-      )
-      const patchData = await request.post(
-        getPatchBuildAPI(type, section?.package_id, section?.password),
-        { responseType: "json", log: true, gameName }
-      )
-
-      buildSize = parseManifests(buildData?.data?.manifests || [], Ver)
-      patchSize = parseManifests(patchData?.data?.manifests || [], Ver)
-
-      formattedTotalSize = api.formatSize(buildSize)
-      incrementalSize = api.formatSize(patchSize)
-    } else {
-      const branch = BranchesData?.data?.game_branches?.[0]
-      Ver = branch?.main?.tag
-      const section = type === "pre" ? branch?.pre_download : branch?.main
-
-      const data = await request.get(getBuildAPI(type, section?.package_id, section?.password), {
-        responseType: "json",
-        log: true,
-        gameName
-      })
-      const manifests = data?.data?.manifests || []
-      const gameManifest = manifests.find((m) => m.matching_field === "game")
-      const asbManifest = manifests.find((m) => m.matching_field === "asb")
-
-      patchSize = gameManifest?.stats?.compressed_size || 0
-      buildSize = asbManifest?.stats?.compressed_size || 0
-
-      formattedTotalSize = api.formatSize(buildSize)
-      incrementalSize = api.formatSize(patchSize)
-    }
-
-    return { formattedTotalSize, incrementalSize, Ver }
   }
 
-  /** 发送图片消息
+  /**
+   * 获取体积信息（厂商差异交给 games.js 的描述符）
+   * @param {string} game - 游戏ID
+   * @param {string} type - 推送类型
+   * @returns {Promise<{formattedTotalSize?: string, incrementalSize?: string, Ver?: string}>}
+   */
+  async fetchSizeInfo(game, type) {
+    return getGameAdapter(game).fetchSize(game, type)
+  }
+
+  /**
+   * 发送图片消息
    * @param {string} type - 推送类型
    * @param {string} game - 游戏ID
    * @param {object} gameConfig - 推送配置
    * @param {object} templateData - 游戏数据
    * @param {string} pushChangeType - 消息类型
+   * @param {string} html - html 模板名
    */
   async sendImageMessage(type, game, gameConfig, templateData, pushChangeType, html) {
     const screenData = await this.screenData(game, type, html)
@@ -230,13 +145,13 @@ class Notifier extends base {
       date: new Date().toLocaleDateString(),
       type
     }
-    const img = await puppeteer.screenshot(`GamePush-Plugin`, data)
-    img
-      ? api.sendToGroups(img, game, gameConfig, pushChangeType)
-      : logger.error(`[${pluginName}] 发送图片消息失败`)
+    const img = await puppeteer.screenshot("GamePush-Plugin", data)
+    if (img) api.sendToGroups(img, game, gameConfig, pushChangeType)
+    else rt.logger?.error(`[${pluginName}] 发送图片消息失败`)
   }
 
-  /** 发送文本消息
+  /**
+   * 发送文本消息
    * @param {string} type - 推送类型
    * @param {string} game - 游戏ID
    * @param {object} gameConfig - 推送配置
@@ -249,7 +164,7 @@ class Notifier extends base {
       if (!template) throw new Error(`未知推送类型: ${type}`)
       api.sendToGroups(template(templateData), game, gameConfig, pushChangeType)
     } catch (err) {
-      logger.error(`[${pluginName}] 发送文本消息失败: ${err.message}`, err)
+      rt.logger?.error(`[${pluginName}] 发送文本消息失败: ${err.message}`, err)
     }
   }
 }

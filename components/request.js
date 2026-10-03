@@ -1,5 +1,6 @@
 import fetch from "node-fetch"
-import { pluginName } from "#GamePush.components"
+// 直接从 detect.js 取，避免经 components 桶文件形成自引用环
+import { pluginName } from "../lib/runtime/detect.js"
 
 class Request {
   /**

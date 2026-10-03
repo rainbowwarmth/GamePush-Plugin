@@ -1,25 +1,33 @@
 {
   "name": "GamePush-Plugin",
-  "version": "1.1.0",
-  "description": "自动监控游戏版本更新并推送通知，支持Yunzai、Karin和yunzai-ng",
+  "version": "1.2.0",
+  "description": "自动监控游戏版本更新并推送通知，支持 Miao-Yunzai、TRSS-Yunzai、MangoCat-Yunzai、JiuLi、Karin、Yunzai-NG 六框架",
   "main": "index.js",
   "author": "rainbowwarmth",
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=22.15.0"
   },
   "scripts": {
-    "lint": "eslint --ext .js,.vue src",
-    "test:sqlite": "node --test test/*.test.js",
     "format": "prettier --write \"./**/*.{js,vue}\"",
+    "lint": "eslint --ext .js .",
     "fix": "eslint --fix --ext .js && npm run format"
   },
   "repository": {
     "type": "git",
     "url": "https://gitcode.com/rainbowwarmth/GamePush-Plugin.git"
   },
-  "keywords": [],
+  "keywords": [
+    "yunzai",
+    "miao-yunzai",
+    "trss-yunzai",
+    "mangocat-yunzai",
+    "jiuli",
+    "karin",
+    "yunzai-ng",
+    "gamepush"
+  ],
   "dependencies": {
     "chokidar": "^4.0.3",
     "node-fetch": "^3.3.2",
@@ -51,11 +59,19 @@
     "#GamePush.lib": "./lib/index.js",
     "#GamePush.model": "./model/index.js",
     "#GamePush.model/commands": "./model/commands.js",
+    "#GamePush.model/tasks": "./model/tasks.js",
     "#GamePush.model/util": "./model/util.js",
-    "#GamePush.model/plugin": "./model/plugin.js",
-    "#GamePush.model/guoba": "./model/guoba.js",
-    "#GamePush.model/webconfig": "./model/webconfig.js",
     "#GamePush.components": "./components/index.js",
-    "#GamePush.runtime": "./lib/runtime/index.js"
+    "#GamePush.runtime": "./lib/runtime/index.js",
+    "#GamePush.runtime/detect": "./lib/runtime/detect.js",
+    "#GamePush.runtime/define": "./lib/runtime/define.js",
+    "#GamePush.runtime/lifecycle": "./lib/runtime/lifecycle.js",
+    "#GamePush.registry": "./lib/runtime/registry/index.js",
+    "#GamePush.registry/app-base": "./lib/runtime/registry/app-base.js",
+    "#GamePush.panels": "./lib/runtime/panels/index.js",
+    "#GamePush.panels/schema": "./lib/runtime/panels/schema.js",
+    "#GamePush.panels/guoba": "./lib/runtime/panels/guoba.js",
+    "#GamePush.panels/karin-web": "./lib/runtime/panels/karin-web.js",
+    "#GamePush.panels/yunzai-ng": "./lib/runtime/panels/yunzai-ng.js"
   }
 }

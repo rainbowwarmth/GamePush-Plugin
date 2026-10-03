@@ -1,6 +1,17 @@
-import { BotName, pluginName, PluginPackage, pluginPath, request } from "#GamePush.components"
-import { GAME_CONFIG, getGameIcon } from "#GamePush.model"
 import path from "path"
+import request from "../components/request.js"
+import { pluginName, PluginPackage } from "../lib/runtime/detect.js"
+import { rt } from "../lib/runtime/index.js"
+import { GAME_CONFIG } from "./util.js"
+import { getGameIcon } from "./games.js"
+
+/** 转成模板里可直接用的路径（正斜杠 + 可选结尾带 /） */
+const toUrlPath = (target, trailingSlash = false) => {
+  const text = String(target).replace(/\\/g, "/")
+  if (!trailingSlash) return text
+  return text.endsWith("/") ? text : `${text}/`
+}
+
 /**
  * 基础类，提供共享功能
  */
@@ -26,19 +37,12 @@ export default class base {
   }
 
   /**
+   * 取游戏图标（实现见 games.js 的对应描述符）
    * @param {string} game - 游戏ID
+   * @returns {Promise<string>} 图标地址
    */
   async GameIcon(game) {
-    if (game === "ww")
-      return "https://cn.bing.com/th?id=OSK.d2e8b2efa5867fba330b354d0472f5e5&w=120&h=120&qlt=120&c=6&rs=1&cdv=1&pid=RS"
-    if (game === "zmd") return "https://bbs.hycdn.cn/asset/endfield.png"
-    const res = await request.get(getGameIcon(), {
-      responseType: "json",
-      log: true,
-      gameName: GAME_CONFIG[game]?.name || "未知游戏"
-    })
-    const { id, biz } = GAME_CONFIG[game]
-    return res.data.games.find((g) => g.id === id || g.biz === biz)?.display?.icon?.url || ""
+    return getGameIcon(game)
   }
 
   /**
@@ -75,6 +79,7 @@ export default class base {
    * 获取截图数据（兼容旧API）
    * @param {string} game - 游戏ID
    * @param {string} type - 截图类型（可选）
+   * @param {string} html - html 模板名
    * @returns {Object} 截图数据
    */
   screenData(game, type = "", html = "") {
@@ -85,35 +90,21 @@ export default class base {
    * 获取截图数据
    * @param {string} game - 游戏ID
    * @param {string} type - 截图类型（可选）
-   * @returns {Object} 截图数据
+   * @param {string} html - html 模板名
+   * @returns {Promise<Object>} 截图数据
    */
   async getScreenData(game, type = "", html = "") {
     const currentDate = this.getCurrentDate()
-    let basic
-    if (BotName === "Karin") {
-      basic = {
-        tplFile: `${pluginPath}/resources/html/GamePush-Plugin/GamePush-Plugin-${html}.html`,
-        fontsPath: `${pluginPath}/resources/fonts/`,
-        pluResPath: `${pluginPath}/resources/`,
-        htmlSavePath: `${this._path}/@karinjs/${pluginName}/html/`,
-        plugin: {
-          name: "karin-plugin-GamePush",
-          version: PluginPackage.version
-        }
-      }
-    } else {
-      basic = {
-        tplFile: path.join(
-          this._path,
-          `plugins/GamePush-Plugin/resources/html/GamePush-Plugin/GamePush-Plugin-${html}.html`
-        ),
-        fontsPath: path.join(this._path, "plugins/GamePush-Plugin/resources/fonts/"),
-        pluResPath: path.join(this._path, "plugins/GamePush-Plugin/resources/"),
-        htmlSavePath: path.join(this._path, "tmp/html/GamePush-Plugin"),
-        plugin: {
-          name: "GamePush-Plugin",
-          version: PluginPackage.version
-        }
+    // 路径全部来自兼容层，不再硬编码插件目录名 —— 改名 / Karin 目录约定都能自适应
+    const resPath = rt.pluginResources || path.join(rt.pluginRoot, "resources")
+    const basic = {
+      tplFile: toUrlPath(path.join(resPath, "html", "GamePush-Plugin", `GamePush-Plugin-${html}.html`)),
+      fontsPath: toUrlPath(path.join(resPath, "fonts"), true),
+      pluResPath: toUrlPath(resPath, true),
+      htmlSavePath: toUrlPath(path.join(rt.dataDir || this._path, "html")),
+      plugin: {
+        name: pluginName,
+        version: PluginPackage.version
       }
     }
     const other = {
@@ -121,16 +112,15 @@ export default class base {
       cwd: this._path,
       htmlFileName: `${game}_${type}_${currentDate}.html`,
       bot: {
-        name: BotName
+        name: rt.BotName
       }
     }
 
-    const iconUrl = await this.GameIcon(game)
     return {
       ...other,
       ...basic,
       gameName: GAME_CONFIG[game]?.name || "未知游戏",
-      icon: await this.embedIcon(iconUrl)
+      icon: await this.embedIcon(await this.GameIcon(game))
     }
   }
 }
