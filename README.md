@@ -3,8 +3,8 @@
 <div align="center">
 
 ![GamePush](https://img.shields.io/badge/GamePush-Plugin-blue?style=for-the-badge&logo=gamepad)
-![Yunzai](https://img.shields.io/badge/Yunzai-green?style=for-the-badge&logo=robot)
-![JiuLi](https://img.shields.io/badge/JiuLi-green?style=for-the-badge&logo=robot)
+![Yunzai](https://img.shields.io/badge/Yunzai-Bot-green?style=for-the-badge&logo=robot)
+![JiuLi](https://img.shields.io/badge/JiuLi-Bot-green?style=for-the-badge&logo=robot)
 ![Karin](https://img.shields.io/badge/Karin-Bot-green?style=for-the-badge&logo=robot)
 ![Yunzai-NG](https://img.shields.io/badge/Yunzai--NG-green?style=for-the-badge&logo=robot)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
@@ -49,7 +49,7 @@ _实时监控游戏版本更新 | 自动推送预下载通知 | 支持多游戏�
 
 ### 前置要求
 
-- ✅ 任选其一：[Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai)、[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)、[MangoCat-Yunzai](https://github.com/MangoCat-Yunzai/MangoCat-Yunzai)、[JiuLi（玖璃）](https://github.com/jiuli-framework/jiuli)、[Karin](https://github.com/KarinJS/Karin)、[Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng)
+- ✅ 任选其一：[Miao-Yunzai](https://github.com/yoimiya-kokomi/Miao-Yunzai)、[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)、[MangoCat-Yunzai](https://github.com/MangoCat-Yunzai/MangoCat-Yunzai)、[JiuLi（玖璃）](https://gitee.com/fox-glaze/jiuli)、[Karin](https://github.com/KarinJS/Karin)、[Yunzai-NG](https://github.com/Yunzai-NG/yunzai-ng)
 - ✅ [Node.js 22.15+](https://nodejs.org/zh-cn/download)（依赖内置 `node:sqlite`，无需编译 `better-sqlite3`）
 - ✅ [Redis 数据库](https://redis.io/)（Yunzai-NG 下由内核提供 KV，无需单独部署）
 
