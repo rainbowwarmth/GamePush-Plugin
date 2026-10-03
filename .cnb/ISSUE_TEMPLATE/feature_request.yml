@@ -1,0 +1,65 @@
+# ⚠️ 本文件是 .github/ISSUE_TEMPLATE/feature_request.yml 的镜像副本，供 CNB（读取 .cnb/ISSUE_TEMPLATE）使用。
+# 修改模板时请同步更新两处，避免各平台内容不一致。
+name: ✨ 功能建议
+description: 提出新功能、体验改进或新游戏支持的建议
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你的建议！请尽量说明使用场景，方便评估优先级。
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: 建议类型
+      options:
+        - 新增游戏支持
+        - 推送 / 通知改进
+        - 配置与可视化面板
+        - 框架适配增强
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: 需求背景
+      description: 你遇到了什么问题？这个功能能解决什么场景？
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望方案
+      description: 你希望它如何工作？如有命令名、配置项的建议请一并写明
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 备选方案
+      description: 你考虑过的其他实现方式或替代做法
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 补充信息
+      description: 截图、参考项目、官方接口地址等
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 参与贡献
+      options:
+        - label: 我愿意提交 PR 实现这个功能
+          required: false

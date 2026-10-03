@@ -1,0 +1,10 @@
+# Issue 模板选择器配置
+# 本目录同时服务于 GitHub（原生）与 Gitee、GitCode（自动回退识别 .github 目录）
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 使用文档（README）
+    url: https://gitcode.com/rainbowwarmth/GamePush-Plugin/blob/main/README.md
+    about: 安装、配置、命令与常见问题，请先阅读 README
+  - name: 💬 项目主页与历史 Issue
+    url: https://gitcode.com/rainbowwarmth/GamePush-Plugin/issues
+    about: 提交前请先搜索是否已有相同问题
