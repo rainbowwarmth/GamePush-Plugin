@@ -2,7 +2,7 @@
 # 修改模板时请同步更新两处，避免各平台内容不一致。
 name: 🧱 新框架适配申请
 description: 申请为尚未支持的机器人框架增加适配
-title: "[适配申请] "
+title: 【适配申请】
 labels:
   - enhancement
 body:

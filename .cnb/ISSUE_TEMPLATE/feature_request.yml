@@ -2,7 +2,7 @@
 # 修改模板时请同步更新两处，避免各平台内容不一致。
 name: ✨ 功能建议
 description: 提出新功能、体验改进或新游戏支持的建议
-title: "[Feature] "
+title: 【Feature】
 labels:
   - enhancement
 body:
