@@ -28,15 +28,34 @@ let apps = {}
 /** yunzai-ng 的插件定义 */
 let plugin = null
 
+function assertNgModuleGraph({ defineGamePushNgPlugin, buildGameApp, buildSetApp, gameIds }) {
+  const missing = []
+  if (typeof defineGamePushNgPlugin !== "function") missing.push("lib/runtime/registry/ng.js#defineGamePushNgPlugin")
+  if (typeof buildGameApp !== "function") missing.push("model/commands.js#buildGameApp")
+  if (typeof buildSetApp !== "function") missing.push("model/commands.js#buildSetApp")
+  if (!Array.isArray(gameIds)) missing.push("model/util.js#gameIds")
+  if (missing.length === 0) return
+
+  throw new Error(
+    `[${pluginName}] 热重载后的模块图不完整，缺少：${missing.join("、")}。\n` +
+      `原因：yunzai-ng 的热重载只对入口文件加缓存戳，嵌套模块仍复用更新前的实例；` +
+      `插件更新一旦改动内部模块结构（新增导出 / 删除文件），就会出现新旧混合。\n` +
+      `→ 请重启 yunzai-ng（不要依赖自动重载）。`
+  )
+}
+
 if (!supported) {
   logger.error(`[${pluginName}] ${describeDetection()}`)
   logger.error(`[${pluginName}] 插件未加载。请确认目录名（Karin 需含 "karin"）与宿主框架版本。`)
 } else if (adapterId === "yunzai-ng") {
-  const [{ defineGamePushNgPlugin }, { buildGameApp, buildSetApp }, { gameIds }] = await Promise.all([
+  const [{ defineGamePushNgPlugin }, commandsMod, utilMod] = await Promise.all([
     import("./lib/runtime/registry/ng.js"),
     import("./model/commands.js"),
     import("./model/util.js")
   ])
+  const { buildGameApp, buildSetApp } = commandsMod
+  const { gameIds } = utilMod
+  assertNgModuleGraph({ defineGamePushNgPlugin, buildGameApp, buildSetApp, gameIds })
   // app 定义在此刻构建，但 handler 内的 rt 属性在 setup(ctx) → initRuntime 之后才会被读到
   plugin = defineGamePushNgPlugin({
     apps: [...gameIds.map((gameId) => buildGameApp(gameId, rt)), buildSetApp(rt)]
