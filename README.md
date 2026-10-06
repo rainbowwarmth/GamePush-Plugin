@@ -141,15 +141,28 @@ pnpm install -P
 
 ### 管理命令
 
-| 命令                        | 功能                                     | 权限   |
-| --------------------------- | ---------------------------------------- | ------ |
-| `#[游戏]删除rediskey`       | 删除游戏 Redis 键值                      | Master |
-| `#[游戏]删除预下载rediskey` | 删除预下载 Redis 键值                    | Master |
-| `#[游戏]设置rediskey 版本`  | 设置游戏 Redis 键值                      | Master |
-| `#[游戏]设置预下载rediskey 版本` | 设置游戏预下载 Redis 键值           | Master |
-| `#更新游戏版本数据`         | 合并远程游戏版本历史数据（保留本地记录） | Master |
+| 命令                             | 功能                                                        | 权限   |
+| -------------------------------- | ----------------------------------------------------------- | ------ |
+| `#[游戏]删除rediskey`            | 删除游戏 Redis 键值                                         | Master |
+| `#[游戏]删除预下载rediskey`      | 删除预下载 Redis 键值                                       | Master |
+| `#[游戏]设置rediskey 版本`       | 设置游戏 Redis 键值                                         | Master |
+| `#[游戏]设置预下载rediskey 版本` | 设置游戏预下载 Redis 键值                                   | Master |
+| `#更新游戏版本数据`              | **稳定版**，拉取远程稳定库并合并（保留本地记录）             | Master |
+| `#更新游戏版本数据稳定版`        | 同上一行为，显式写法                                         | Master |
+| `#更新游戏版本数据发行版`        | **发行版**，扫描本地 `resources` 目录，按游戏补齐缺失记录    | Master |
 
 > 管理命令的游戏前缀同样可省略，省略时默认作用于**原神**。
+
+**稳定版 vs 发行版**
+
+| | 稳定版 | 发行版 |
+| --- | --- | --- |
+| 数据来源 | 远程稳定库（随官方节奏发布） | 本地 `resources/<游戏>/main\|pre/<版本号>.json` |
+| 是否联网 | 是 | 否，纯离线 |
+| 写入方式 | `INSERT OR IGNORE` 合并 | `INSERT OR IGNORE` 补齐 |
+| 适用场景 | 获取经过验证的全量历史 | 用插件自带的较新快照补齐，或离线环境 |
+
+> 两个命令都**只增不改**，已有记录不会被覆盖，可反复执行。
 
 ---
 
@@ -167,8 +180,77 @@ pnpm install -P
 | Yunzai-NG                  | `data/plugin/GamePush-Plugin/sql/GamePush-Plugin.db`     |
 
 - 首次启动时会从远程拉取版本历史数据作为初始数据，失败仅告警并回退到本地库。
-- `#更新游戏版本数据` 采用 **`INSERT OR IGNORE` 合并**而非覆盖，本地记录不会丢失。
+- `#更新游戏版本数据` / `#更新游戏版本数据稳定版` 采用 **`INSERT OR IGNORE` 合并**而非覆盖，本地记录不会丢失。
 - 使用 Yunzai-NG 时，插件在自己的 `data/plugin/GamePush-Plugin/sql/` 下维护数据库，并在首次启动时**只读导入**原内核目录 `data/sql/GamePush-Plugin/` 中的历史数据；原数据库不会被删除或修改。
+
+### 发行版数据目录
+
+发行版命令会从两个起点向下探测，凡是**直接包含**「已知游戏（`ys`/`sr`/`zzz`/`bh3`/`ww`/`zmd`）的 `main` 或 `pre` 子目录」的目录，都会被当作数据根：
+
+1. 框架根目录 `resources/`
+2. 插件目录 `resources/`
+
+之所以要向下探测而不是只扫起点：数据通常由独立的资源仓库维护，例如
+
+```
+D:/Desktop/Yunzai/resources/resources/          ← clone 的资源仓库（cnb: rainbowwarmth/resources）
+└─ GamePush-Plugin/
+   ├─ GamePush-Plugin.db                        ← 稳定版数据
+   └─ ys/  sr/  zzz/  bh3/  ww/  zmd/           ← 发行版数据（本命令读取）
+      ├─ main/7.1.0.json
+      └─ pre/7.1.0.json
+```
+
+探测深度上限 4 层，遇到 `.git` / `node_modules` 等目录跳过；非已知游戏名的目录（如其他插件的 `json/`、`http/`）一律忽略。
+
+每个 json 的内容（游戏名与版本号来自目录/文件名）：
+
+```jsonc
+// GamePush-Plugin/ys/main/7.1.0.json
+{ "version": "7.1.0", "size": "135.85 GB", "time": "2026/09/23 20:40:00" }
+
+// GamePush-Plugin/ys/pre/7.1.0.json —— pre 额外需要 oldver（升级前版本）
+{ "version": "7.1.0", "oldver": "7.0.0", "size": "9.79 GB", "time": "2026/09/21 21:55:00" }
+```
+
+- `version` 缺省时取文件名；`size` 必填；`time` 缺省时回落文件修改时间。
+- `pre` 记录缺少 `oldver` 会被跳过（表定义中该列 `NOT NULL`）。
+- 名称不以 `.json` 结尾的文件一律忽略。
+
+### 自动化维护
+
+资源仓库内提供 `scripts/` 与 `.cnb.yml`，由 CNB 定时驱动（也可本地手动执行）：
+
+| 脚本 | 作用 |
+| --- | --- |
+| `scripts/seed-from-db.mjs` | 首次部署：把 `GamePush-Plugin.db` 按 gameid 拆分，铺成 `<游戏>/main\|pre/<版本号>.json` |
+| `scripts/update-versions.mjs` | 增量采集：请求各家官方接口，把新版本写进数据目录（已存在的跳过） |
+
+```bash
+node scripts/seed-from-db.mjs --db=GamePush-Plugin/GamePush-Plugin.db   # 导出种子
+node scripts/update-versions.mjs                    # 全量采集 6 款游戏
+node scripts/update-versions.mjs --game=ys          # 只采集指定游戏
+node scripts/update-versions.mjs --dry-run          # 只打印，不落盘
+```
+
+**CNB 定时任务**：6 款游戏共用同一条 cron，每 5 分钟一轮、覆盖每天 03:00–23:59：
+
+```
+crontab: */5 3-23 * * *     # POSIX 5 字段 → 分 时 日 月 周
+```
+
+同一个 `crontab:` 键下挂 6 个并列 job（每个游戏一个，并行执行、各自独立提交）。某款游戏接口超时不会影响其他游戏，本轮没采到的 5 分钟后下一轮自己会补上。
+
+> ⚠️ 两处写法差异，别混用：
+> - **CNB** 的 `crontab:` 只接受**标准 POSIX 5 字段**；插件本体用的 Quartz 6 字段（含「秒」和 `?`）在这里不识别，必须写作 `*/5 3-23 * * *`。
+> - YAML 键**不可重复**。若把 6 个游戏写成 6 个相同值的 `crontab:` 键，后面的会覆盖前面的，最终只有 1 个游戏被采集 —— 所以必须挂在同一个键下。
+>
+> 6 个 job 同轮并行存在同时 push 的可能，各 job 内已内置「拉取-重推」重试兜底。
+
+> 采集脚本在插件仓库 `scripts/` 下同样保留一份，便于本地生成/校验数据。
+
+
+
 
 ---
 
@@ -198,7 +280,7 @@ pnpm install -P
 可配置项：
 
 - 🎛️ 推送开关 / 日志开关
-- ⏰ 定时任务 cron 表达式（默认 `0 */5 3-22 * * ?` —— 每天 3:00–22:55 每 5 分钟一次）
+- ⏰ 定时任务 cron 表达式（默认 `0 */5 3-23 * * ?` —— 每天 3:00–23:55 每 5 分钟一次）
 - 👥 推送的「机器人 + 群」列表
 - 🖼️ 消息类型（图片 / 文字）与 html 模板（默认 / 简约）
 
