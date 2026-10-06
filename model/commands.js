@@ -112,10 +112,22 @@ export function buildSetCommands(rt) {
       handler: (e) => handleSetPreKey(e, rt)
     },
     {
-      reg: "#更新游戏版本数据",
+      reg: "^#*更新游戏版本数据\\s*$",
       fnc: "updatedb",
       permission: "master",
-      handler: (e) => handleUpdateDb(e, rt)
+      handler: (e) => handleUpdateDbStable(e, rt)
+    },
+    {
+      reg: "^#*更新游戏版本数据稳定版\\s*$",
+      fnc: "updatedbStable",
+      permission: "master",
+      handler: (e) => handleUpdateDbStable(e, rt)
+    },
+    {
+      reg: "^#*更新游戏版本数据发行版\\s*$",
+      fnc: "updatedbRelease",
+      permission: "master",
+      handler: (e) => handleUpdateDbRelease(e, rt)
     }
   ]
 }
@@ -340,15 +352,41 @@ async function handleSetPreKey(e, rt) {
   }
 }
 
-async function handleUpdateDb(e, rt) {
+/**
+ * 稳定版：拉取 cnb 上的稳定库并合并（INSERT OR IGNORE，不覆盖本地已有记录）。
+ * `#更新游戏版本数据` 与 `#更新游戏版本数据稳定版` 共用此实现。
+ */
+async function handleUpdateDbStable(e, rt) {
   await ensureModel()
-  await e.reply("正在更新版本数据，请稍候...")
+  await e.reply("正在更新稳定版数据，请稍候...")
   try {
     const version = await rt.db.updateDatabase()
-    return e.reply(`版本数据更新完成！, 当前数据版本：${version}`)
+    return e.reply(`✅ 稳定版数据更新完成！当前数据版本：${version}`)
   } catch (err) {
-    rt.logger?.error("[#更新游戏版本数据] 失败", err)
-    return e.reply(`版本数据更新失败：${err.message}`, true)
+    rt.logger?.error("[#更新游戏版本数据稳定版] 失败", err)
+    return e.reply(`❌ 稳定版数据更新失败：${err.message}`, true)
+  }
+}
+
+/**
+ * 发行版：扫描本地 resources 目录（<game>/main|pre/<版本号>.json），
+ * 与本地库比对后补齐缺失行。离线执行，不动已有记录。
+ */
+async function handleUpdateDbRelease(e, rt) {
+  await e.reply("正在用发行版数据补齐本地库，请稍候...")
+  try {
+    const result = await rt.db.syncRelease()
+    const msg = [
+      "✅ 发行版数据补齐完成",
+      `数据目录：${result.roots.join("、")}`,
+      `覆盖游戏：${result.games.length ? result.games.join("、") : "无"}`,
+      `扫描到：main ${result.scannedMain} 条 / pre ${result.scannedPre} 条`,
+      `新增入库：main ${result.addedMain} 条 / pre ${result.addedPre} 条`
+    ].join("\n")
+    return e.reply(msg, true)
+  } catch (err) {
+    rt.logger?.error("[#更新游戏版本数据发行版] 失败", err)
+    return e.reply(`❌ 发行版数据补齐失败：${err.message}`, true)
   }
 }
 

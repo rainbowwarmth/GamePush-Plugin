@@ -1,1 +1,4 @@
 node_modules
+
+# AI 助手项目数据（规划/记忆/门禁脚本），不随插件分发
+.workbuddy/
