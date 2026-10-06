@@ -168,9 +168,11 @@ const mhy = {
             0
           )
 
+      // getBuild 接受 GET；getPatchBuild 只接受 POST —— 用 GET 会恒返回 405，
+      // request 回退成 false，manifests 求和得 0，导致增量包体积永远是 0.00 B。
       const [build, patch] = await Promise.all([
         request.get(buildUrl("getBuild", type, packageId, password), reqOpts(game)),
-        request.get(buildUrl("getPatchBuild", type, packageId, password), reqOpts(game))
+        request.post(buildUrl("getPatchBuild", type, packageId, password), undefined, reqOpts(game))
       ])
 
       return {
