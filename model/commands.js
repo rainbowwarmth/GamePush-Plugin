@@ -345,7 +345,7 @@ async function handleUpdateDb(e, rt) {
   await e.reply("正在更新版本数据，请稍候...")
   try {
     const version = await rt.db.updateDatabase()
-    return e.reply(`版本数据更新完成！, 当前数据版本：${version}`)
+    return e.reply(`版本数据更新完成！当前数据版本：${version}`)
   } catch (err) {
     rt.logger?.error("[#更新游戏版本数据] 失败", err)
     return e.reply(`版本数据更新失败：${err.message}`, true)

@@ -147,75 +147,39 @@ pnpm install -P
 | `#[游戏]删除预下载rediskey`      | 删除预下载 Redis 键值                                       | Master |
 | `#[游戏]设置rediskey 版本`       | 设置游戏 Redis 键值                                         | Master |
 | `#[游戏]设置预下载rediskey 版本` | 设置游戏预下载 Redis 键值                                   | Master |
-| `#更新游戏版本数据`              | **稳定版**，拉取远程稳定库并合并（保留本地记录）             | Master |
-| `#更新游戏版本数据稳定版`        | 同上一行为，显式写法                                         | Master |
-| `#更新游戏版本数据发行版`        | **发行版**，扫描本地 `resources` 目录，按游戏补齐缺失记录    | Master |
+| `#更新游戏版本数据`              | 拉取 cnb.cool 远程库并合并（保留本地记录）                   | Master |
 
 > 管理命令的游戏前缀同样可省略，省略时默认作用于**原神**。
 
-**稳定版 vs 发行版**
-
-| | 稳定版 | 发行版 |
-| --- | --- | --- |
-| 数据来源 | 远程稳定库（随官方节奏发布） | 本地 `resources/<游戏>/main\|pre/<版本号>.json` |
-| 是否联网 | 是 | 否，纯离线 |
-| 写入方式 | `INSERT OR IGNORE` 合并 | `INSERT OR IGNORE` 补齐 |
-| 适用场景 | 获取经过验证的全量历史 | 用插件自带的较新快照补齐，或离线环境 |
-
-> 两个命令都**只增不改**，已有记录不会被覆盖，可反复执行。
+数据来源**只有一处**：cnb.cool 资源仓库的 `GamePush-Plugin.db`。启动时按版本号增量同步，
+该命令则是忽略版本号强制重拉。写入一律 `INSERT OR IGNORE`，**只增不改**，可反复执行。
 
 ---
 
 ## 💾 数据存储
 
-插件采用混合存储：**当前版本状态**存放在 Redis / 内核 KV，**历史版本包体数据**存放在内置 SQLite（`node:sqlite`，无需安装 `better-sqlite3`）。
+插件采用混合存储：**当前版本状态**存放在 Redis / 内核 KV，**历史版本包体数据**存放在 SQLite。
 
-数据库文件名**恒为** `GamePush-Plugin.db`（取插件 `package.json` 的 `name`，不随目录名变化），存放目录随框架而变：
+数据库文件名**恒为** `GamePush-Plugin.db`（取插件 `package.json` 的 `name`，不随目录名变化）。存放位置与归属随框架而变：
 
-| 框架                       | 数据库路径                                               |
-| -------------------------- | -------------------------------------------------------- |
-| Miao-Yunzai / TRSS-Yunzai / MangoCat-Yunzai | `data/GamePush-Plugin.db`                |
-| JiuLi                      | `data/plugins/GamePush-Plugin/GamePush-Plugin.db`         |
-| Karin                      | `@karinjs/karin-plugin-gamepush/data/GamePush-Plugin.db` |
-| Yunzai-NG                  | `data/plugin/GamePush-Plugin/sql/GamePush-Plugin.db`     |
+| 框架 | 数据库路径 | 归属 |
+| --- | --- | --- |
+| Miao-Yunzai / TRSS-Yunzai / MangoCat-Yunzai | `data/GamePush-Plugin.db` | 插件自管 |
+| JiuLi | `data/plugins/GamePush-Plugin/GamePush-Plugin.db` | 插件自管 |
+| Karin | `@karinjs/karin-plugin-gamepush/data/GamePush-Plugin.db` | 插件自管 |
+| Yunzai-NG | `data/sql/GamePush-Plugin/GamePush-Plugin.db` | 内核 `ctx.sql` |
 
-- 首次启动时会从远程拉取版本历史数据作为初始数据，失败仅告警并回退到本地库。
-- `#更新游戏版本数据` / `#更新游戏版本数据稳定版` 采用 **`INSERT OR IGNORE` 合并**而非覆盖，本地记录不会丢失。
-- 使用 Yunzai-NG 时，插件在自己的 `data/plugin/GamePush-Plugin/sql/` 下维护数据库，并在首次启动时**只读导入**原内核目录 `data/sql/GamePush-Plugin/` 中的历史数据；原数据库不会被删除或修改。
+- 除 Yunzai-NG 外，其余框架用 Node 内置 `node:sqlite` 自管连接，无需安装 `better-sqlite3`。
+- Yunzai-NG 走官方 `ctx.sql()`：连接、卸载回收、WebUI 存储面板都由内核负责，库名固定为 `GamePush-Plugin`，与旧版 ctx.sql 库同路径。
+- 两条路径的表结构完全一致（`main` / `pre`，字段含 `game`、版本、`size`、`time`、`synced_at`）。首次在 Yunzai-NG 下启动时会把旧的自管库**只读合并**进来，原文件不删不改。
+- `synced_at` 为入库时间戳（毫秒），用于排查同步；远程库没有该列时按导入时间补齐。
+- 首次启动会从 cnb.cool 拉取历史数据，失败仅告警并回退本地库。
+- `#更新游戏版本数据` 采用 **`INSERT OR IGNORE` 合并**而非覆盖，本地记录不会丢失。
 
-### 发行版数据目录
+### 资源仓库
 
-发行版命令会从两个起点向下探测，凡是**直接包含**「已知游戏（`ys`/`sr`/`zzz`/`bh3`/`ww`/`zmd`）的 `main` 或 `pre` 子目录」的目录，都会被当作数据根：
-
-1. 框架根目录 `resources/`
-2. 插件目录 `resources/`
-
-之所以要向下探测而不是只扫起点：数据通常由独立的资源仓库维护，例如
-
-```
-D:/Desktop/Yunzai/resources/resources/          ← clone 的资源仓库（cnb: rainbowwarmth/resources）
-└─ GamePush-Plugin/
-   ├─ GamePush-Plugin.db                        ← 稳定版数据
-   └─ ys/  sr/  zzz/  bh3/  ww/  zmd/           ← 发行版数据（本命令读取）
-      ├─ main/7.1.0.json
-      └─ pre/7.1.0.json
-```
-
-探测深度上限 4 层，遇到 `.git` / `node_modules` 等目录跳过；非已知游戏名的目录（如其他插件的 `json/`、`http/`）一律忽略。
-
-每个 json 的内容（游戏名与版本号来自目录/文件名）：
-
-```jsonc
-// GamePush-Plugin/ys/main/7.1.0.json
-{ "version": "7.1.0", "size": "135.85 GB", "time": "2026/09/23 20:40:00" }
-
-// GamePush-Plugin/ys/pre/7.1.0.json —— pre 额外需要 oldver（升级前版本）
-{ "version": "7.1.0", "oldver": "7.0.0", "size": "9.79 GB", "time": "2026/09/21 21:55:00" }
-```
-
-- `version` 缺省时取文件名；`size` 必填；`time` 缺省时回落文件修改时间。
-- `pre` 记录缺少 `oldver` 会被跳过（表定义中该列 `NOT NULL`）。
-- 名称不以 `.json` 结尾的文件一律忽略。
+资源仓库（cnb: `rainbowwarmth/resources`）除维护 `GamePush-Plugin.db` 外，也会把记录拆成
+`<游戏>/main|pre/<版本号>.json` 便于人工审阅与 Git 差异。插件运行时**只消费 `.db`**，不读取这些 json。
 
 ### 自动化维护
 
