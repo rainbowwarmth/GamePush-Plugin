@@ -1,4 +1,5 @@
 import fetch from "node-fetch"
+import { Buffer } from "node:buffer"
 // 直接从 detect.js 取，避免经 components 桶文件形成自引用环
 import { pluginName } from "../lib/runtime/detect.js"
 
@@ -24,12 +25,14 @@ class Request {
   /**
    * 处理不同格式的响应
    * @param {Response} response - 原始响应对象
-   * @param {"json"|"text"|"raw"} [responseType="json"] - 期望的响应格式
+   * @param {"json"|"text"|"raw"|"buffer"} [responseType="json"] - 期望的响应格式
    * @returns {Promise<any>} 处理后的响应数据
    */
   async handleRequest(response, responseType) {
     if (responseType === "raw") return response
     try {
+      // buffer 用于 manifest 这类二进制响应（zstd 压缩的 protobuf，不能当文本读）
+      if (responseType === "buffer") return Buffer.from(await response.arrayBuffer())
       return responseType === "json" ? await response.json() : await response.text()
     } catch (error) {
       logger.error("[GamePush-Plugin] 响应解析失败:", error)
@@ -43,7 +46,7 @@ class Request {
    * @param {string} url - 请求URL
    * @param {Object} [options={}] - 请求选项
    * @param {Object} [options.body] - 请求体数据（POST用）
-   * @param {"json"|"text"|"raw"} [options.responseType="json"] - 响应数据类型
+   * @param {"json"|"text"|"raw"|"buffer"} [options.responseType="json"] - 响应数据类型
    * @param {Object} [options.headers={}] - 自定义请求头
    * @param {boolean} [options.log=true] - 是否记录请求日志
    * @param {string} [options.gameName] - 游戏名称（用于日志前缀）
@@ -110,7 +113,7 @@ class Request {
    * @param {string} url - 请求URL
    * @param {Object} [options] - 高级选项
    * @param {Object} [options.headers] - 自定义请求头
-   * @param {"json"|"text"|"raw"} [options.responseType] - 响应数据类型
+   * @param {"json"|"text"|"raw"|"buffer"} [options.responseType] - 响应数据类型
    * @param {boolean} [options.log] - 是否记录日志
    * @param {string} [options.gameName] - 游戏名称
    * @param {number} [options.retry] - 重试次数
@@ -127,7 +130,7 @@ class Request {
    * @param {Object} body - 请求体内容
    * @param {Object} [options] - 高级选项
    * @param {Object} [options.headers] - 自定义请求头
-   * @param {"json"|"text"|"raw"} [options.responseType] - 响应数据类型
+   * @param {"json"|"text"|"raw"|"buffer"} [options.responseType] - 响应数据类型
    * @param {boolean} [options.log] - 是否记录日志
    * @param {string} [options.gameName] - 游戏名称
    * @param {number} [options.retry] - 重试次数

@@ -27,12 +27,14 @@ class Notifier extends base {
         .filter(Boolean)
         .join("\n"),
 
-    pre: ({ gameName, newVersion, formattedTotalSize, incrementalSize }) =>
+    pre: ({ gameName, newVersion, formattedTotalSize, incrementalSize, diskSize }) =>
       [
         `🎁${gameName}预下载资源已开放`,
         `📦新版本：${newVersion}`,
         formattedTotalSize && `📦完整大小（含中文语音）：${formattedTotalSize}`,
         incrementalSize && `🔄增量更新大小：约${incrementalSize}`,
+        // 崩坏3 的启动器弹窗会额外报「所需空间」，与增量差 5 倍左右，容易让人以为算错
+        diskSize && `💾预下载所需空间：约${diskSize}`,
         "📥请提前下载游戏资源",
         ...(gameName !== "原神" && gameName !== "崩坏3"
           ? [`💾 发送【#${gameName}获取下载链接】获取客户端`]
@@ -64,7 +66,7 @@ class Notifier extends base {
       }
 
       const gameConfig = cfg.getGameConfig(game)
-      const { formattedTotalSize, incrementalSize, Ver } = await this.fetchSizeInfo(game, type)
+      const { formattedTotalSize, incrementalSize, diskSize, Ver } = await this.fetchSizeInfo(game, type)
 
       await this.storeSizeData(game, type, { newVersion, Ver, formattedTotalSize, incrementalSize })
 
@@ -76,7 +78,8 @@ class Notifier extends base {
         newVersion,
         Ver,
         formattedTotalSize,
-        incrementalSize
+        incrementalSize,
+        diskSize
       }
 
       if (pushChangeType === "1") {
