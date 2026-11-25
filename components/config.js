@@ -28,9 +28,6 @@ const CONFIG_DIR = (() => {
 })()
 const CONFIG_PATH = path.join(CONFIG_DIR, "GamePush-Plugin.yaml")
 
-// 本模块单例随 import 构造，早于 yunzai-ng 适配器补上 globalThis.logger。
-// 用惰性代理：取值时才解析全局 logger —— import 期(全局未就绪)回落 console 不报错，
-// 运行期(全局已就绪)仍走框架 logger。方法要 bind 回原对象，否则 this 变成代理
 const logger = new Proxy(
   {},
   {
@@ -45,13 +42,9 @@ const logger = new Proxy(
 class Config {
   configCache = {}
   watcher = null
-  // yunzai-ng 内核配置句柄（ctx.config）。非空即表示配置读写走内核而非本地 fs。
   yngConfig = null
 
   constructor() {
-    // yunzai-ng 下配置交由内核 ctx.config 托管（WebUI 面板可视化编辑，落盘 config/<插件名>.yaml），
-    // 不在此建 data/plugin 文件、也不起 fs 监听 —— 等插件 setup 里调用 bindYng 注入句柄。
-    // 先用默认值占位，避免 setup 之前被读到 undefined。
     if (adapterId === "yunzai-ng") {
       this.configCache = this.getDefaultConfig()
       return
@@ -230,8 +223,6 @@ class Config {
 
   /** 保存配置 */
   saveConfig(newConfig) {
-    // yunzai-ng：写内核（原子落盘 config/<插件名>.yaml + 热更新 + 面板同步）。
-    // pushGroups 以对象数组存内核（schema 即对象），不做字符串序列化。
     if (this.yngConfig) {
       this.configCache = newConfig
       this.yngConfig

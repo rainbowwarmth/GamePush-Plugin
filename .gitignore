@@ -1,8 +1,1 @@
 node_modules
-
-# 运行时数据：sophon 清单缓存与正式版快照，随机器变化，不随插件分发
-data/sophon-cache/
-data/sophon-state.json
-
-# AI 助手项目数据（规划/记忆/门禁脚本），不随插件分发
-.workbuddy/

@@ -1,20 +1,5 @@
 /**
- * 各游戏接口描述符 —— model 层**唯一**知道「某游戏怎么请求、响应长什么样」的地方
- *
- * 重构前这些知识散在四处：util.js 拼 URL、api.js 解析版本检查响应（还内联了一整份鹰角
- * 请求代码）、download.js 解析下载响应（又抄了一份鹰角请求代码）、base.js 取图标。
- * 结果是同一份请求代码存在两份、同一个接口被解析两遍、同一个字段在两地各写一种取法。
- *
- * 现在按「游戏」聚合：一个游戏一处，对外只暴露四个归一化后的能力 ——
- *
- *   fetchVersion(game)         → { main, pre }   主版本号 / 预下载版本号（可能为 undefined）
- *   fetchPackages(game, type)  → { data, patch } 下载数据：data 完整包、patch 增量包
- *   fetchSize(game, type)      → { formattedTotalSize, incrementalSize, Ver }
- *   icon(game)                 → string          图标地址
- *
- * 上层（api.js / download.js / notice.js）因此退化为纯编排，不再出现 `if (game === "zmd")`。
- *
- * 三个厂商：米哈游（ys/sr/zzz/bh3）、库洛（ww）、鹰角（zmd）。
+ * 各游戏接口描述符 —— model 层
  */
 import request from "../components/request.js"
 import { pluginName } from "../lib/runtime/detect.js"
@@ -183,27 +168,12 @@ const mhy = {
       }
     }
 
-    // ── bh3：没有补丁通道，只能拿两份全量清单做**每文件**分片差分 ──
-    //
-    // getPatchBuild 对崩坏3 恒返回 0 条 manifest（加 version / diff_tags 参数都一样），
-    // predownload 分支的 diff_tags 也恒为空 —— 「增量包」这条路根本不存在。
-    // 但启动器照样报得出精确的预下载量：它拉 main + pre_download 两份**全量**清单，
-    // 按文件逐个比对分片。model/sophon.js 复刻的就是这一步。
-    //
-    // 只统计 game 分类：asb（过场动画，28.6 GiB）不计入预下载弹窗，
-    // 启动器实测的 365.83MB 就只含 game。详见 model/sophon.js 顶部说明。
-    //
-    // 代价：两份 game 清单共约 0.25MB 流量 + 1.5 秒 CPU，**不下载任何游戏分片**；
-    // 「完整大小 30.17 GB」只是 JSON 里的 deduplicated_stats 汇总，不产生流量。
     const isPre = type === "pre"
     const targetSection = isPre ? branch?.pre_download : branch?.main
     if (!targetSection?.package_id) {
       throw new Error(`[${pluginName}] ${getGameName(game)}缺少${isPre ? "预下载" : "正式版"}分支`)
     }
 
-    // 基准版本（旧清单）从哪来：
-    //   预下载 —— 当前正式版，现拉一次 getBuild("main")
-    //   正式版 —— main 此时已指向新版本，只能取上次留存的快照
     const oldVer = isPre ? branch?.main?.tag : getMainSnapshot(game)?.tag
 
     const targetBuild = await request.get(
@@ -231,6 +201,7 @@ const mhy = {
     const diff = await diffBuilds({
       nextManifests,
       prevManifests,
+      game,
       // 只有 game 参与预下载；asb 是游戏内按需下载的过场动画包
       onlyFields: ["game"],
       label: getGameName(game)
@@ -242,19 +213,14 @@ const mhy = {
       0
     )
 
-    // 正式版推送后把这一版清单存下来，作为下一轮的差分基准
     if (!isPre) saveMainSnapshot(game, { tag: branch?.main?.tag, manifests: nextManifests })
 
-    // 预下载期间顺手把当前正式版清单存成快照：两份 getBuild 都已经拉过了，
-    // 这一步零成本，却让「新装插件 → 首次预下载 → 正式版更新」这条链路
-    // 在正式版推送时也有基准可用，不至于少一行增量。
     if (isPre && prevManifests && getMainSnapshot(game)?.tag !== branch?.main?.tag) {
       saveMainSnapshot(game, { tag: branch?.main?.tag, manifests: prevManifests })
     }
 
     return {
       formattedTotalSize: formatSize(totalDownload),
-      // 没有基准清单、或新旧清单完全一致时给不出增量，返回 undefined 让文案自然省略该行
       incrementalSize: prevManifests && diff.download > 0 ? formatSize(diff.download) : undefined,
       // 「所需空间」：启动器弹窗第二个数字，= 更新后 game 成品占用 + 下载缓存
       diskSize: prevManifests && diff.download > 0 ? formatSize(diff.diskSize) : undefined,

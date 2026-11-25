@@ -1,9 +1,5 @@
 /**
  * 推送编排
- *
- * 推送渠道与文案在这里；「各游戏体积怎么算」在 model/games.js 的 fetchSize。
- * 重构前 fetchSizeInfo 内部有 4 个按游戏分叉的分支（zmd / ww / ys·sr·zzz / bh3），
- * 还自己重拼了一遍 branches 与 build 接口的 URL。
  */
 import { puppeteer } from "#GamePush.lib"
 import { cfg, pluginName } from "#GamePush.components"

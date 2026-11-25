@@ -1,7 +1,5 @@
 /**
  * 定时任务定义（框架无关）
- *
- * 只声明「哪个游戏、什么频率、跑什么」，由兼容层的注册器翻译成各框架的定时器语法。
  */
 import { getGameName } from "./util.js"
 import { cfg } from "../components/index.js"
